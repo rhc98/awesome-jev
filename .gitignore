@@ -7,3 +7,4 @@ data/enriched/
 site/.next/
 **/.omc/*data/*.log
 .omc/
+notes/

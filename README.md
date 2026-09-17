@@ -8,6 +8,8 @@ Every repository here was collected from GitHub, then judged by Jev in a single 
 
 This is an independent community project, not affiliated with TypeSafe AI. Jev and System One are TypeSafe AI product names.
 
+![Pipeline: GitHub search and community lists feed candidates into code, Jev judges each repository in one call, code applies the policy with human overrides, and the README and site are published daily.](docs/diagrams/pipeline.png)
+
 ## Contents
 
 - [Official](#official)

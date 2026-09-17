@@ -87,6 +87,10 @@ function main() {
     `This is an independent community project, not affiliated with TypeSafe AI. Jev and System One are TypeSafe AI product names.`,
   )
   out.push('')
+  out.push(
+    `![Pipeline: GitHub search and community lists feed candidates into code, Jev judges each repository in one call, code applies the policy with human overrides, and the README and site are published daily.](docs/diagrams/pipeline.png)`,
+  )
+  out.push('')
   out.push('## Contents')
   out.push('')
   const present = SECTIONS.filter(s => picks.some(e => e.category === s.id))

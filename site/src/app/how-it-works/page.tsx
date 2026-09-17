@@ -87,6 +87,13 @@ export default function HowItWorksPage() {
       </p>
 
       <Section title="Pipeline">
+        <img
+          src="/pipeline.png"
+          alt="Data-flow diagram: GitHub search and community lists feed candidates into pipeline code, Jev judges each repository in one call, code applies the policy with human overrides, and the README and site are published daily."
+          width={1456}
+          height={872}
+          className="mb-6 w-full max-w-3xl rounded border border-line"
+        />
         <ol className="flex flex-col gap-4">
           {STEPS.map((step, index) => (
             <li key={step.name} className="flex gap-4">
