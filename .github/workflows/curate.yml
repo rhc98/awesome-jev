@@ -1,0 +1,66 @@
+name: Curate
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      quick:
+        description: "Skip code search and per-day windows"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: curate
+  cancel-in-progress: false
+
+jobs:
+  curate:
+    runs-on: ubuntu-latest
+    steps:
+      # BOT_TOKEN (fine-grained PAT, contents:write) lets the bot push to main through the
+      # admin bypass of the branch ruleset. Falls back to GITHUB_TOKEN if unset.
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Discover
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm discover ${{ inputs.quick && '--quick' || '' }}
+
+      - name: Enrich
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm enrich
+
+      - name: Judge
+        env:
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+        run: pnpm judge --concurrency 4
+
+      - name: Curate and build
+        run: pnpm curate && pnpm readme
+
+      - name: Commit
+        run: |
+          git config user.name "awesome-jev-bot"
+          git config user.email "bot@awesome-jev.xyz"
+          git add data/candidates.jsonl data/judgments.jsonl data/curated.json README.md
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "curate: $(date -u +%Y-%m-%d) — $(node -e 'const c=require("./data/curated.json").stats;console.log(`${c.total} judged, ${c.listed} listed, ${c.review} review`)')"
+            git push
+          fi

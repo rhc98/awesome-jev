@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --panel-alt: #fafafa;
+  --fg: #16181d;
+  --muted: #64707d;
+  --line: #e3e6ea;
+  --chip: #f2f4f6;
+  --track: #e6e9ec;
+  --accent: #2c5fd6;
+  --accent-soft: #eaf0fe;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0c0e11;
+    --panel: #12151a;
+    --panel-alt: #171b21;
+    --fg: #e4e7eb;
+    --muted: #949ea9;
+    --line: #232830;
+    --chip: #1a1f26;
+    --track: #262c35;
+    --accent: #7ba6f5;
+    --accent-soft: #182337;
+  }
+}
+
+@theme inline {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-alt: var(--panel-alt);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-chip: var(--chip);
+  --color-track: var(--track);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+input,
+select {
+  font: inherit;
+  color: inherit;
+}

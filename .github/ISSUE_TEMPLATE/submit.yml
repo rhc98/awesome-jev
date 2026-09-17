@@ -1,0 +1,26 @@
+name: Submit a project
+description: Add a Jev / TypeSafe project. The pipeline judges it on the next run.
+title: "Submit: "
+labels: [submission]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: GitHub repository URL
+      placeholder: https://github.com/owner/repo
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What does it do with Jev?
+      description: One or two sentences. Helps humans; Jev reads the repository itself.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: The repository is public and not a fork
+          required: true
+        - label: It actually calls, wraps, evaluates, or reimplements Jev / System One
+          required: true

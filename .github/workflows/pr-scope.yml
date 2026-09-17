@@ -1,0 +1,36 @@
+name: PR scope
+
+# Community pull requests may only change data/overrides.yaml (plus the regenerated
+# README.md and data/curated.json). Anything else needs a maintainer-authored PR.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  scope:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check changed paths
+        env:
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          MAINTAINERS: "rhc98"
+        run: |
+          if echo " $MAINTAINERS " | grep -q " $AUTHOR "; then
+            echo "maintainer PR, no scope restriction"
+            exit 0
+          fi
+          changed=$(git diff --name-only "origin/${{ github.base_ref }}"...HEAD)
+          echo "$changed"
+          bad=$(echo "$changed" | grep -vE '^(data/overrides\.yaml|data/curated\.json|README\.md)$' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::Community PRs may only change data/overrides.yaml (and regenerated README.md / data/curated.json). Out of scope:"
+            echo "$bad"
+            exit 1
+          fi

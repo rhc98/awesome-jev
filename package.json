@@ -1,0 +1,27 @@
+{
+  "name": "awesome-jev",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "discover": "tsx pipeline/discover.ts",
+    "enrich": "tsx pipeline/enrich.ts",
+    "judge": "tsx pipeline/judge.ts",
+    "curate": "tsx pipeline/curate.ts",
+    "inspect": "tsx pipeline/inspect.ts",
+    "pipeline": "pnpm discover && pnpm enrich && pnpm judge && pnpm curate && pnpm readme",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "readme": "tsx pipeline/build-readme.ts",
+    "calibrate": "tsx pipeline/calibrate.ts"
+  },
+  "dependencies": {
+    "@typesafe-ai/sdk": "^0.6.0",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
+    "@types/node": "^22.20.3",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}

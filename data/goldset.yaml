@@ -1,0 +1,125 @@
+# Human labels for calibration. Never read by the pipeline's judge/curate steps.
+# genuine: is this repo substantively about Jev / System One (uses, wraps, evaluates, or reimplements it)?
+# category: one of sdk_client|integration|agent_tooling|application|game_sim|research_eval|learning|other (omit if unsure)
+# substance: 0 toy/empty · 1 small demo · 2 real tool · 3 production-grade (omit if unsure)
+# Labeler: rhc (1st pass by Claude from README/description evidence, reviewed by rhc). Status: DRAFT
+
+# ---- noise controls (linked from other lists or keyword matches, not Jev projects) ----
+different-ai/openwork:
+  genuine: false
+  note: generic open-source agent workspace; no Jev
+lahfir/agent-desktop:
+  genuine: false
+  note: generic agent desktop; no Jev
+usenotra/notra:
+  genuine: false
+  note: unrelated product linked from a list
+
+# ---- official ----
+typesafe-ai/typesafe-sdk-js:
+  genuine: true
+  category: sdk_client
+  substance: 3
+typesafe-ai/typesafe-sdk-python:
+  genuine: true
+  category: sdk_client
+  substance: 3
+typesafe-ai/system-one-adapter-python:
+  genuine: true
+  category: sdk_client
+  substance: 2
+  note: drop-in client backed by LLM APIs; sdk_client vs integration is a fair split
+typesafe-ai/skills:
+  genuine: true
+  category: agent_tooling
+  substance: 1
+
+# ---- community: confident ----
+browser-use/jev-ultrafast:
+  genuine: true
+  category: agent_tooling
+  note: browser agent element selection; application is defensible
+jarrodwatts/jev-trader:
+  genuine: true
+  category: application
+  substance: 1
+TheoLeeCJ/openjev:
+  genuine: true
+  category: research_eval
+  substance: 2
+vinnylarouge/jevlike:
+  genuine: true
+  category: research_eval
+  substance: 2
+rorshopping/jev-on-a-laptop:
+  genuine: true
+  category: research_eval
+fhshaik/typesafe-mario:
+  genuine: true
+  category: game_sim
+  substance: 2
+RomanSlack/jev-drone:
+  genuine: true
+  category: game_sim
+  substance: 1
+devagrawal09/jev-review:
+  genuine: true
+  category: agent_tooling
+  substance: 2
+NiazMorshed2007/jev-review:
+  genuine: true
+  category: agent_tooling
+  substance: 2
+gargpratyush/jev-router:
+  genuine: true
+  category: agent_tooling
+  substance: 2
+vlad-terin/jev-browser:
+  genuine: true
+  category: agent_tooling
+jkudish/jev-mcp:
+  genuine: true
+  category: agent_tooling
+  substance: 1
+itsmostafa/typesafe-mcp:
+  genuine: true
+  category: agent_tooling
+y0usaf/pi-jev:
+  genuine: true
+  category: agent_tooling
+DevMortimer/pi-warden:
+  genuine: true
+  category: agent_tooling
+awlevin/typesafe-computer-use:
+  genuine: true
+  category: agent_tooling
+  note: computer-use agent; application is defensible
+typesafeainate/dspy-typesafeify:
+  genuine: true
+  category: integration
+kieranklaassen/ruby_llm-typesafe:
+  genuine: true
+  category: integration
+  substance: 2
+pithings/advocaat:
+  genuine: true
+  category: sdk_client
+iammrduncan/typesafe-ai-benchmark:
+  genuine: true
+  category: research_eval
+brainstormity/Jev-Moderation-Bot:
+  genuine: true
+  category: application
+AbdelStark/awesome-typesafe:
+  genuine: true
+  note: meta list; category handled by is_meta_list, not by category choice
+
+# ---- borderline (README barely mentions Jev; integration lives in a sub-path) ----
+vercel/eve:
+  genuine: true
+  category: integration
+  note: ships Jev as default eval model in experimental evaluate path; README does not say so
+vercel-labs/ai-cli:
+  genuine: true
+  category: integration
+  note: CLI can run Jev as evaluation model; README mention is thin

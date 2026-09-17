@@ -1,0 +1,8 @@
+# Code, CI, and site changes need maintainer review. Community PRs touch data/overrides.yaml only.
+*                 @rhc98
+pipeline/         @rhc98
+site/             @rhc98
+.github/          @rhc98
+package.json      @rhc98
+pnpm-lock.yaml    @rhc98
+biome.json        @rhc98

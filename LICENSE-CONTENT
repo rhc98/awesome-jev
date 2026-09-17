@@ -1,0 +1,12 @@
+CC0 1.0 Universal
+
+To the extent possible under law, the maintainers of awesome-jev have waived all
+copyright and related or neighboring rights to the list content of this
+repository: README.md, data/curated.json, data/overrides.yaml, and
+data/goldset.yaml.
+
+Full legal text: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+This dedication does not cover the pipeline or site source code, which is
+licensed under the MIT License in LICENSE, nor any third-party project linked
+from the list, each of which keeps its own license.

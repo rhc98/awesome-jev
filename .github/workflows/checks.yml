@@ -1,0 +1,65 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  code:
+    name: Lint and types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: npx tsc --noEmit
+
+  reproducible:
+    name: README and curated.json match policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Regenerate from stored judgments
+        run: pnpm curate && pnpm readme
+      - name: Fail if committed files are stale
+        run: |
+          git diff --exit-code -- README.md data/curated.json \
+            || (echo "::error::Run 'pnpm curate && pnpm readme' and commit the result" && exit 1)
+
+  list:
+    name: Awesome list format and links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: awesome-lint
+        run: npx --yes awesome-lint README.md
+      - name: Link check
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Own site links are generated from the same data and guaranteed by the site build.
+          args: --no-progress --max-retries 2 --accept 200,204,206,429 --exclude awesome-jev.xyz README.md
+          fail: true
+          token: ${{ secrets.GITHUB_TOKEN }}

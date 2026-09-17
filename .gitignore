@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.*
+data/enriched/
+*.log
+.DS_Store
+site/.next/
+**/.omc/*data/*.log
+.omc/

@@ -1,0 +1,31 @@
+name: Jev got it wrong
+description: A repository is listed, excluded, or categorized incorrectly.
+title: "Judgment: "
+labels: [judgment]
+body:
+  - type: input
+    id: repo
+    attributes:
+      label: Repository
+      placeholder: owner/repo
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is wrong?
+      options:
+        - Excluded but it is a genuine Jev project
+        - Listed but it is not about Jev
+        - Wrong category
+        - Wrong pattern
+        - Score looks off (substance / docs / novelty)
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Point at the file, README section, or behavior that shows the right answer. This becomes the `reason` in data/overrides.yaml.
+    validations:
+      required: true
