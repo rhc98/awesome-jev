@@ -11,7 +11,7 @@ One Jev call per repository answers eleven typed questions. Three of them are ca
 | Question | Type | Used for |
 |---|---|---|
 | `genuine` — substantively about Jev / System One (uses, wraps, evaluates, reimplements it)? | Noul (probability) | the listed / review / excluded gate |
-| `category` — one of eight project kinds | Choice with confidence | README section and site facet |
+| `category` — one of eight project kinds | Choice with confidence | README section and site facet; below `category_uncertain_below` the entry is labelled uncertain |
 | `substance` — 0 toy/empty · 1 small demo · 2 real tool · 3 production-grade | Score | ranking within a category, and a floor for listing |
 
 Everything Jev sees is README excerpt, description, topics, manifests and repository metadata. It never sees source code. That constraint explains most of the failures below.
@@ -71,7 +71,7 @@ Agreement on the 66 categorised repositories: **61 / 66 = 0.92**. Confusion, hum
 
 `integration` is the one weak class: half of its six examples land in a neighbouring bucket. The definition ("adapter that plugs Jev into an existing framework, gateway, platform or database") overlaps with `agent_tooling` when the framework is an agent framework and with `sdk_client` when the adapter is thin. That is a question-set problem, not a model one, and is the first candidate for a v3 wording change.
 
-Reported confidence is honest, which is what makes `category_conf_min` 0.5 a meaningful policy knob:
+Reported confidence is honest, which is what makes a threshold on it worth having at all:
 
 | confidence | n | accuracy |
 |---|---|---|
@@ -80,7 +80,13 @@ Reported confidence is honest, which is what makes `category_conf_min` 0.5 a mea
 | 0.7 – 0.9 | 4 | 0.75 |
 | 0.9 – 1.0 | 49 | **1.00** |
 
-Three quarters of judgments come back at 0.9 or above, and every one of those is right. The policy sends anything under 0.5 to review; on this set that catches two of the five errors at the cost of four repositories a human has to look at.
+Three quarters of judgments come back at 0.9 or above, and every one of those is right. Below 0.5 the category is a coin flip.
+
+**Category confidence is no longer a listing condition.** It was one — `category_conf_min` 0.5, a third clause beside `genuine` and `substance` — and that was a category error in the policy. Confidence in `category` answers *which shelf*, not *whether this belongs on any shelf*; `genuine` already answers the second question, and the two are close to independent. The gold set shows how far apart they can sit: `hyg/blog`, a personal blog matching on an incidental `api.typesafe.ai` string, is `genuine` 0.08 with category confidence 0.96. Running the reverse rule — list on either signal — drops precision from 0.97 to 0.89 on this set by admitting that blog, a trading bot and a generic agent desktop.
+
+Holding the other side back cost just as much for no gain: 76 repositories sat in review with a median `genuine` of 0.90 and passing substance, kept out of the index only because Jev could not decide between two shelves. They are now listed with the category marked uncertain — a dashed chip and a question mark on the row, the confidence itself on the entry page — which says what is actually true instead of hiding a repository over a label. The threshold survives under the name it earned, `category_uncertain_below` 0.5, outside the `gate` block. The review queue went from 148 to 72; every remaining entry is held by `genuine` or `substance`, the two questions that are about belonging.
+
+Only Jev's own choice can be uncertain. `official`, `meta_list` and the reimplementation route are assigned in code, and a human override is a human's, so none of them carries a model confidence to doubt.
 
 ## 5. Substance
 

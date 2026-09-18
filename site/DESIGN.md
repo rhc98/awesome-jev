@@ -146,6 +146,9 @@ components:
     activeBackground: "{colors.verdict-soft}"
     activeColor: "{colors.verdict}"
     activeBorder: "1px solid {colors.verdict}"
+    outlineBorder: "1px solid {colors.hairline}"
+    uncertainBorder: "1px dashed {colors.hairline-strong}"
+    uncertainSuffix: "?"
     rounded: "{rounded.full}"
     padding: "3px 10px"
     label: "{typography.body-sm}"
@@ -304,6 +307,7 @@ Status as a segmented control (four chips joined, one active with `{colors.verdi
 - Line 1: name in `{typography.title}` ink, `owner/` prefix in `{typography.mono-md}` mute, star count right-aligned in `{typography.number}`.
 - Line 2: description in `{typography.body-sm}` body, two-line clamp.
 - Line 3: **verdict strip** — three inline `{components.verdict-bar}`/`{components.score-scale}` cells (genuine · category confidence · substance) each with its mono figure, then chips for category and language. Category chip is the only chip with a hairline border; language is text-only.
+- **Uncertain category** — when Jev's category confidence falls below the policy's `category_uncertain_below`, the category chip takes `{components.chip}` `uncertainBorder` and a trailing `?` in `{colors.mute}`. Dashed already means unsettled here (review rows use the same hairline), so it needs no colour of its own. It is a label, not a status: the entry is listed on `genuine` and `substance` like any other, and the confidence figure is on the entry page.
 - Review rows: bottom hairline dashed, name in `{colors.mute}`, reason in `{typography.mono-md}` `{colors.review}` on its own line.
 - Excluded rows: name and description in `{colors.faint}`, no verdict strip, reason only.
 

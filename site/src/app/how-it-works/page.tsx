@@ -218,7 +218,11 @@ export default function HowItWorksPage() {
                 gate from 0.6 buys recall without paying precision; 0.4 admits the first noise. A
                 separate substance floor keeps empty scaffolds in review even when they pass the
                 gate. The sweep above over-states the miss rate: repositories near the gate were
-                deliberately over-sampled.
+                deliberately over-sampled. Those two are the whole gate. Category confidence used to
+                be a third condition and is not one any more: it answers which shelf an entry
+                belongs on, not whether it belongs on any, and the two are independent enough that a
+                personal blog with no Jev in it scores 0.96. A repository Jev is sure about is now
+                listed with its category marked uncertain rather than held back.
               </p>
             </div>
 
@@ -239,8 +243,9 @@ export default function HowItWorksPage() {
                     .map(c => [categoryLabel(c.human), categoryLabel(c.jev), c.count])}
                 />
                 <p className="text-muted">
-                  Reported confidence tracks accuracy, which is what makes the category-confidence
-                  threshold in the policy meaningful:
+                  Reported confidence tracks accuracy, which is what the uncertainty threshold
+                  reads. Below it the category is shown with a question mark instead of stated
+                  plainly; listing is unaffected.
                 </p>
                 <Table
                   head={['Confidence', 'n', 'Accuracy']}

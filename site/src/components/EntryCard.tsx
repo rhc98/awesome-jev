@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { VerdictCell } from '@/components/Bars'
-import { Chip } from '@/components/Chip'
-import { categoryLabel, entryHref, githubUrl, splitRepo } from '@/lib/data'
+import { CategoryChip } from '@/components/Chip'
+import { entryHref, githubUrl, splitRepo } from '@/lib/data'
 import { compactNumber } from '@/lib/format'
 import type { Entry } from '@/lib/types'
 
@@ -35,7 +35,7 @@ export function EntryCard({ entry }: { entry: Entry }) {
       </p>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Chip tone="outline">{categoryLabel(entry.category)}</Chip>
+        <CategoryChip category={entry.category} uncertain={entry.category_uncertain} />
         {entry.language ? (
           <span className="font-mono text-[12px] text-muted">{entry.language}</span>
         ) : null}

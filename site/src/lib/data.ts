@@ -8,13 +8,15 @@ export const calibration = (calibrationJson as unknown as Calibration | null) ??
 
 export const entries: Entry[] = curated.entries
 
-/** Policy gates; every verdict bar draws its tick from these. Never hard-code a threshold. */
-const gates = (curated.policy as { gate?: Record<string, unknown> } | undefined)?.gate ?? {}
-const gateOf = (key: string, fallback: number) =>
-  typeof gates[key] === 'number' ? (gates[key] as number) : fallback
-export const GATE = gateOf('listed_min', 0.6)
-export const CATEGORY_GATE = gateOf('category_conf_min', 0.5)
-export const SUBSTANCE_GATE = gateOf('substance_min', 0.5)
+/** Policy thresholds; every verdict bar draws its tick from these. Never hard-code one. */
+const policy = (curated.policy ?? {}) as Record<string, unknown>
+const gates = (policy.gate as Record<string, unknown> | undefined) ?? {}
+const numberOf = (source: Record<string, unknown>, key: string, fallback: number) =>
+  typeof source[key] === 'number' ? (source[key] as number) : fallback
+export const GATE = numberOf(gates, 'listed_min', 0.6)
+export const SUBSTANCE_GATE = numberOf(gates, 'substance_min', 0.5)
+/** Not a gate. Below this the category is labelled uncertain and the entry is listed anyway. */
+export const CATEGORY_UNCERTAIN_BELOW = numberOf(policy, 'category_uncertain_below', 0.5)
 
 export const CATEGORY_LABELS: Record<string, string> = {
   official: 'Official',

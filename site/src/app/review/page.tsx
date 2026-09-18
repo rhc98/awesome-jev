@@ -20,8 +20,11 @@ export default function ReviewPage() {
       <h1 className="font-semibold text-[28px] leading-9 tracking-[-0.02em]">Review queue</h1>
       <p className="mt-2 max-w-2xl text-body">
         These repositories fell between the gates: Jev was confident enough not to drop them, but
-        not confident enough to list them. The policy leaves them here rather than guessing. A human
-        reading one repository for thirty seconds usually settles it.
+        not confident enough to list them. Two things hold a repository here — genuine below the
+        listed gate, or substance below the floor that separates a real project from an empty
+        scaffold. An unclear category does not: that is marked on the entry and listed anyway. The
+        policy leaves the rest here rather than guessing, and a human reading one repository for
+        thirty seconds usually settles it.
       </p>
       <p className="mt-3 max-w-2xl text-muted">
         If you can tell which way a row should go — or if you spot a wrong call anywhere in the

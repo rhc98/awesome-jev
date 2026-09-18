@@ -2,8 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ProbBar, ScaleBar } from '@/components/Bars'
-import { Chip } from '@/components/Chip'
+import { CategoryChip, Chip } from '@/components/Chip'
 import {
+  CATEGORY_UNCERTAIN_BELOW,
   categoryLabel,
   entries,
   findEntry,
@@ -108,7 +109,7 @@ export default async function EntryPage({ params }: { params: Promise<Params> })
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-1.5">
-        <Chip tone="outline">{categoryLabel(entry.category)}</Chip>
+        <CategoryChip category={entry.category} uncertain={entry.category_uncertain} />
         <Chip>{patternLabel(entry.pattern)}</Chip>
         <Chip>{STATUS_LABELS[entry.status] ?? entry.status}</Chip>
         {entry.language ? (
@@ -175,10 +176,20 @@ export default async function EntryPage({ params }: { params: Promise<Params> })
       </Section>
 
       <Section title="Category distribution">
+        {entry.category_uncertain ? (
+          <p className="mb-4 text-[13px] text-muted">
+            Jev's confidence in this category is below {num(CATEGORY_UNCERTAIN_BELOW, 1)}, so the
+            category is shown with a question mark. It is not a listing condition: this entry's
+            status was decided by genuine and substance alone.
+          </p>
+        ) : null}
         <CategoryProbs entry={entry} />
         <div className="mt-4 grid gap-x-10 sm:grid-cols-2">
           <div>
-            <Field label="Assigned category" value={categoryLabel(entry.category)} />
+            <Field
+              label="Assigned category"
+              value={`${categoryLabel(entry.category)}${entry.category_uncertain ? ' (uncertain)' : ''}`}
+            />
             <Field label="Category probability" value={num(entry.jev.category_p)} />
             <Field label="Category confidence" value={num(entry.jev.category_conf)} />
           </div>
