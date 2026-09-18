@@ -71,6 +71,31 @@ export interface Calibration {
   qset: string
   computed_at?: string
   n: number
+  gate_listed_min?: number
   gate_sweep: GateSweepRow[]
-  category_agreement: number
+  category_agreement: number | null
+  category?: {
+    n: number
+    agreement: number | null
+    confusion: { human: string; jev: string; count: number }[]
+    reliability: { lo: number; hi: number; n: number; acc: number }[]
+  }
+  substance?: { n: number; spearman: number; mae: number } | null
+  disagreements?: { repo: string; jev: number; human: boolean; note: string }[]
+  cost?: {
+    calls: number
+    repos: number
+    input_tokens_total: number
+    input_tokens_mean: number
+    output_tokens_mean: number
+    latency_p50_ms: number | null
+    latency_p90_ms: number | null
+    usd_per_1m_input: number
+    usd_est: number
+  }
+  qset_diff?: {
+    prev: string
+    n: number
+    rows: { metric: string; prev: number | null; current: number | null }[]
+  } | null
 }
