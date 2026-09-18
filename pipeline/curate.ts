@@ -13,11 +13,13 @@ import { type CATEGORIES, QSET } from './questions.v2.js'
 
 export const POLICY = {
   qset: QSET,
-  // v1 run on 40 repos: noise scored ≤0.16, genuine projects 0.46–0.89 → thresholds provisional until goldset.
+  // Goldset v2 (80 repos, 2026-09-18): no false positives at genuine ≥0.5; 0.6→0.5 lifts recall 0.79→0.84
+  // with precision 1.00. 0.4 admits the first noise (a file-less repo at 0.44). See data/calibration.json.
   gate: {
-    listed_min: 0.6,
+    listed_min: 0.5,
     review_min: 0.3,
     category_conf_min: 0.5,
+    substance_min: 0.5, // below this a genuine repo is an empty scaffold; goldset: 4/7 such repos are noise
     meta_list_min: 0.7,
     reimpl_min: 0.7,
   },
@@ -114,7 +116,8 @@ function main() {
       reason = `meta list (is_meta_list ${a.is_meta_list.noul.toFixed(2)})`
     } else if (
       genuine >= POLICY.gate.listed_min &&
-      a.category.confidence >= POLICY.gate.category_conf_min
+      a.category.confidence >= POLICY.gate.category_conf_min &&
+      a.substance.score >= POLICY.gate.substance_min
     ) {
       status = 'listed'
       reason = 'gate passed'
@@ -123,7 +126,9 @@ function main() {
       reason =
         genuine < POLICY.gate.listed_min
           ? `genuine ${genuine.toFixed(2)} below ${POLICY.gate.listed_min}`
-          : `category confidence ${a.category.confidence.toFixed(2)} below ${POLICY.gate.category_conf_min}`
+          : a.category.confidence < POLICY.gate.category_conf_min
+            ? `category confidence ${a.category.confidence.toFixed(2)} below ${POLICY.gate.category_conf_min}`
+            : `substance ${a.substance.score.toFixed(2)} below ${POLICY.gate.substance_min}`
     } else {
       status = 'excluded'
       reason = `genuine ${genuine.toFixed(2)} below ${POLICY.gate.review_min}`

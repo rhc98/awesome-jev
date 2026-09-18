@@ -1,7 +1,8 @@
 {
   "qset": "v2",
-  "computed_at": "2026-09-18T01:35:13.539Z",
+  "computed_at": "2026-09-18T03:47:40.904Z",
   "n": 80,
+  "gate_listed_min": 0.5,
   "gate_sweep": [
     {
       "thr": 0.2,
