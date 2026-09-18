@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { EntryCard } from '@/components/EntryCard'
+import { EntryRow } from '@/components/EntryRow'
 import { categories, categoryLabel, entries, languages, patternLabel, patterns } from '@/lib/data'
 import type { Entry, Status } from '@/lib/types'
 
 type StatusFilter = Status | 'all'
 type SortKey = 'score' | 'stars' | 'created' | 'pushed'
+type View = 'rows' | 'cards'
 
 const STATUS_TABS: { value: StatusFilter; label: string }[] = [
   { value: 'listed', label: 'Listed' },
@@ -22,7 +24,11 @@ const SORTS: { value: SortKey; label: string }[] = [
   { value: 'pushed', label: 'Recently pushed' },
 ]
 
-const DEFAULTS = { status: 'listed' as StatusFilter, sort: 'score' as SortKey }
+const DEFAULTS = {
+  status: 'listed' as StatusFilter,
+  sort: 'score' as SortKey,
+  view: 'rows' as View,
+}
 
 function matchesQuery(entry: Entry, query: string): boolean {
   if (!query) return true
@@ -70,6 +76,7 @@ export function Directory() {
   const language = params.lang ?? ''
   const status = (params.status ?? DEFAULTS.status) as StatusFilter
   const sort = (params.sort ?? DEFAULTS.sort) as SortKey
+  const view = (params.view === 'cards' ? 'cards' : DEFAULTS.view) as View
 
   const commit = useCallback((next: URLSearchParams) => {
     const qs = next.toString()
@@ -112,128 +119,209 @@ export function Directory() {
       .sort((a, b) => compare(a, b, sort))
   }, [language, pattern, query, selectedCategories, sort, status])
 
+  const categoryCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const entry of entries) {
+      if (status !== 'all' && entry.status !== status) continue
+      counts.set(entry.category, (counts.get(entry.category) ?? 0) + 1)
+    }
+    return counts
+  }, [status])
+
   const hasFilters =
     Boolean(query || pattern || language || selectedCategories.length) ||
     status !== DEFAULTS.status ||
-    sort !== DEFAULTS.sort
+    sort !== DEFAULTS.sort ||
+    view !== DEFAULTS.view
 
   const controlClass =
-    'rounded border border-line bg-panel px-2.5 py-1.5 text-[13px] outline-none focus:border-accent'
+    'h-9 rounded-md border border-line bg-panel px-3 text-[14px] outline-none focus:border-accent'
+  const segClass = (active: boolean) =>
+    `px-3 py-1.5 text-[13px] leading-5 ${
+      active ? 'bg-accent-soft font-medium text-accent' : 'text-muted hover:text-fg'
+    }`
 
   return (
-    <section>
-      <div className="flex flex-col gap-3 border-line border-b py-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="search"
-            value={query}
-            onChange={event => setParam('q', event.target.value)}
-            placeholder="Search name, description, or owner/repo"
-            aria-label="Search entries"
-            className={`${controlClass} min-w-[14rem] flex-1`}
-          />
-          <select
-            value={pattern}
-            onChange={event => setParam('pattern', event.target.value)}
-            aria-label="Filter by pattern"
-            className={controlClass}
-          >
-            <option value="">All patterns</option>
-            {patterns.map(value => (
-              <option key={value} value={value}>
-                {patternLabel(value)}
-              </option>
-            ))}
-          </select>
-          <select
-            value={language}
-            onChange={event => setParam('lang', event.target.value)}
-            aria-label="Filter by language"
-            className={controlClass}
-          >
-            <option value="">All languages</option>
-            {languages.map(value => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-          <select
-            value={sort}
-            onChange={event => setParam('sort', event.target.value)}
-            aria-label="Sort entries"
-            className={controlClass}
-          >
-            {SORTS.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5">
-          {STATUS_TABS.map(tab => (
+    <section className="lg:grid lg:grid-cols-[200px_1fr] lg:gap-10">
+      <aside className="hidden lg:block">
+        <p className="cap border-line border-t pt-6 pb-3">Category</p>
+        <ul className="flex flex-col">
+          <li>
             <button
-              key={tab.value}
               type="button"
-              onClick={() => setParam('status', tab.value === DEFAULTS.status ? '' : tab.value)}
-              aria-pressed={status === tab.value}
-              className={`rounded border px-2.5 py-1 text-[13px] ${
-                status === tab.value
-                  ? 'border-accent bg-accent-soft text-accent'
-                  : 'border-line bg-panel text-muted hover:border-accent/50'
+              onClick={() => setParam('cat', '')}
+              aria-pressed={selectedCategories.length === 0}
+              className={`flex w-full items-baseline justify-between py-1 text-left text-[13px] ${
+                selectedCategories.length === 0 ? 'text-fg' : 'text-muted hover:text-fg'
               }`}
             >
-              {tab.label}
+              <span>All</span>
+              <span className="num font-mono text-[12px] text-faint">
+                {[...categoryCounts.values()].reduce((a, b) => a + b, 0)}
+              </span>
             </button>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5">
+          </li>
           {categories.map(value => {
             const active = selectedCategories.includes(value)
             return (
-              <button
-                key={value}
-                type="button"
-                onClick={() => toggleCategory(value)}
-                aria-pressed={active}
-                className={`rounded-full border px-2.5 py-0.5 text-[12px] ${
-                  active
-                    ? 'border-accent bg-accent-soft text-accent'
-                    : 'border-line bg-chip text-muted hover:border-accent/50'
-                }`}
-              >
-                {categoryLabel(value)}
-              </button>
+              <li key={value}>
+                <button
+                  type="button"
+                  onClick={() => toggleCategory(value)}
+                  aria-pressed={active}
+                  className={`flex w-full items-baseline justify-between py-1 text-left text-[13px] ${
+                    active ? 'text-accent' : 'text-muted hover:text-fg'
+                  }`}
+                >
+                  <span>{categoryLabel(value)}</span>
+                  <span className="num font-mono text-[12px] text-faint">
+                    {categoryCounts.get(value) ?? 0}
+                  </span>
+                </button>
+              </li>
             )
           })}
-        </div>
-      </div>
+        </ul>
+      </aside>
 
-      <div className="flex items-center justify-between gap-3 py-3 text-[13px] text-muted">
-        <span>
-          {results.length} {results.length === 1 ? 'entry' : 'entries'}
-        </span>
-        {hasFilters ? (
-          <button type="button" onClick={reset} className="text-accent hover:underline">
-            Reset filters
-          </button>
-        ) : null}
-      </div>
+      <div className="min-w-0">
+        <div className="flex flex-col gap-3 border-line border-t pt-4 pb-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="search"
+              value={query}
+              onChange={event => setParam('q', event.target.value)}
+              placeholder="Search name, description, or owner/repo"
+              aria-label="Search entries"
+              className={`${controlClass} min-w-[14rem] flex-1 placeholder:font-mono placeholder:text-[13px] placeholder:text-faint`}
+            />
+            <select
+              value={pattern}
+              onChange={event => setParam('pattern', event.target.value)}
+              aria-label="Filter by pattern"
+              className={controlClass}
+            >
+              <option value="">All patterns</option>
+              {patterns.map(value => (
+                <option key={value} value={value}>
+                  {patternLabel(value)}
+                </option>
+              ))}
+            </select>
+            <select
+              value={language}
+              onChange={event => setParam('lang', event.target.value)}
+              aria-label="Filter by language"
+              className={controlClass}
+            >
+              <option value="">All languages</option>
+              {languages.map(value => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+            <select
+              value={sort}
+              onChange={event => setParam('sort', event.target.value)}
+              aria-label="Sort entries"
+              className={controlClass}
+            >
+              {SORTS.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      {results.length === 0 ? (
-        <p className="rounded-md border border-line border-dashed p-8 text-center text-[13px] text-muted">
-          No entries match these filters.
-        </p>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {results.map(entry => (
-            <EntryCard key={entry.repo} entry={entry} />
-          ))}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <fieldset className="inline-flex overflow-hidden rounded-full border border-line">
+              <legend className="sr-only">Status</legend>
+              {STATUS_TABS.map(tab => (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => setParam('status', tab.value === DEFAULTS.status ? '' : tab.value)}
+                  aria-pressed={status === tab.value}
+                  className={`${segClass(status === tab.value)} border-line border-r last:border-r-0`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </fieldset>
+            <fieldset className="inline-flex overflow-hidden rounded-full border border-line">
+              <legend className="sr-only">View</legend>
+              <button
+                type="button"
+                onClick={() => setParam('view', '')}
+                aria-pressed={view === 'rows'}
+                className={`${segClass(view === 'rows')} border-line border-r`}
+              >
+                Rows
+              </button>
+              <button
+                type="button"
+                onClick={() => setParam('view', 'cards')}
+                aria-pressed={view === 'cards'}
+                className={segClass(view === 'cards')}
+              >
+                Cards
+              </button>
+            </fieldset>
+          </div>
+
+          <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 lg:hidden">
+            {categories.map(value => {
+              const active = selectedCategories.includes(value)
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => toggleCategory(value)}
+                  aria-pressed={active}
+                  className={`shrink-0 rounded-full border px-2.5 py-1 text-[12px] leading-4 ${
+                    active
+                      ? 'border-accent bg-accent-soft text-accent'
+                      : 'border-transparent bg-chip text-body'
+                  }`}
+                >
+                  {categoryLabel(value)}
+                </button>
+              )
+            })}
+          </div>
         </div>
-      )}
+
+        <div className="flex items-center justify-between gap-3 py-2 text-[13px] text-muted">
+          <span className="num font-mono">
+            {results.length} {results.length === 1 ? 'entry' : 'entries'}
+          </span>
+          {hasFilters ? (
+            <button type="button" onClick={reset} className="text-accent hover:underline">
+              Reset filters
+            </button>
+          ) : null}
+        </div>
+
+        {results.length === 0 ? (
+          <p className="py-16 text-center text-[14px] text-muted">
+            No entries match these filters.
+          </p>
+        ) : view === 'cards' ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {results.map(entry => (
+              <EntryCard key={entry.repo} entry={entry} />
+            ))}
+          </div>
+        ) : (
+          <ul className="border-line border-t">
+            {results.map(entry => (
+              <EntryRow key={entry.repo} entry={entry} />
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   )
 }

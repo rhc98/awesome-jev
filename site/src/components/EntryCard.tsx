@@ -1,49 +1,72 @@
 import Link from 'next/link'
-import { MiniMeter } from '@/components/Bars'
+import { VerdictCell } from '@/components/Bars'
 import { Chip } from '@/components/Chip'
-import { categoryLabel, entryHref, githubUrl, patternLabel } from '@/lib/data'
+import { categoryLabel, entryHref, githubUrl, splitRepo } from '@/lib/data'
 import { compactNumber } from '@/lib/format'
 import type { Entry } from '@/lib/types'
 
+/** Optional grid view. Same content as EntryRow, in a white card. */
 export function EntryCard({ entry }: { entry: Entry }) {
+  const { owner } = splitRepo(entry.repo)
+  const review = entry.status === 'review'
+  const excluded = entry.status === 'excluded'
+  const nameColor = excluded ? 'text-faint' : review ? 'text-muted' : 'text-fg'
+
   return (
-    <article className="flex flex-col gap-2 rounded-md border border-line bg-panel p-3.5">
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="min-w-0 font-medium leading-snug">
-          <a
-            href={githubUrl(entry.repo)}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="break-words hover:text-accent"
-          >
+    <article
+      className={`flex flex-col gap-2 rounded-md border bg-panel p-4 transition-colors hover:border-line-strong ${
+        review ? 'border-line border-dashed' : 'border-line'
+      }`}
+    >
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className={`min-w-0 text-[16px] leading-6 font-semibold ${nameColor}`}>
+          <Link href={entryHref(entry.repo)} className="break-words hover:text-accent">
+            <span className="font-mono text-[12px] font-normal text-muted">{owner}/</span>
             {entry.name}
-          </a>
+          </Link>
         </h3>
-        <span className="shrink-0 font-mono text-[12px] text-muted tabular-nums">
+        <span className="num shrink-0 font-mono text-[12px] text-muted">
           ★ {compactNumber(entry.stars)}
         </span>
       </div>
 
-      <p className="text-[13px] text-muted leading-snug">
+      <p className={`line-clamp-3 text-[13px] leading-5 ${excluded ? 'text-faint' : 'text-body'}`}>
         {entry.description?.trim() || 'No description provided.'}
       </p>
 
-      <div className="flex flex-wrap items-center gap-1.5">
-        <Chip tone="accent">{categoryLabel(entry.category)}</Chip>
-        <Chip>{patternLabel(entry.pattern)}</Chip>
-        {entry.language ? <Chip>{entry.language}</Chip> : null}
-        {entry.readme_pick ? <Chip tone="accent">README pick</Chip> : null}
-        {entry.status !== 'listed' ? <Chip>{entry.status}</Chip> : null}
+      <div className="flex flex-wrap items-center gap-2">
+        <Chip tone="outline">{categoryLabel(entry.category)}</Chip>
+        {entry.language ? (
+          <span className="font-mono text-[12px] text-muted">{entry.language}</span>
+        ) : null}
+        {entry.readme_pick ? <span className="cap text-accent">readme pick</span> : null}
       </div>
 
-      <div className="mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-line border-t pt-2">
-        <MiniMeter label="genuine" value={entry.jev.genuine} />
-        <span className="font-mono text-[11px] text-muted tabular-nums">
-          score {entry.jev.composite.toFixed(3)}
+      <div className="mt-auto flex flex-col gap-1.5 border-line border-t pt-2.5">
+        {excluded ? (
+          <span className="font-mono text-[12px] text-faint">excluded: {entry.status_reason}</span>
+        ) : (
+          <>
+            <VerdictCell label="genuine" value={entry.jev.genuine} />
+            <VerdictCell label="subst" value={entry.jev.substance} kind="scale" />
+          </>
+        )}
+        {review ? (
+          <span className="font-mono text-[12px] text-review">
+            held because: {entry.status_reason}
+          </span>
+        ) : null}
+        <span className="flex justify-between font-mono text-[11px] text-faint">
+          <a
+            href={githubUrl(entry.repo)}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="hover:text-fg"
+          >
+            github ↗
+          </a>
+          <span className="num">score {entry.jev.composite.toFixed(3)}</span>
         </span>
-        <Link href={entryHref(entry.repo)} className="text-[12px] text-accent hover:underline">
-          Judgment
-        </Link>
       </div>
     </article>
   )
