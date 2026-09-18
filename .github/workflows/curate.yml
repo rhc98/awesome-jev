@@ -20,6 +20,11 @@ concurrency:
 jobs:
   curate:
     runs-on: ubuntu-latest
+    # Without this the job inherits the 6h default. A run that sits in rate-limit
+    # sleep for hours blocks the next day's scheduled run (concurrency group above
+    # does not cancel in progress) and burns runner time invisibly. The enriched
+    # cache makes a timeout a checkpoint rather than a loss: the next run resumes.
+    timeout-minutes: 90
     steps:
       # BOT_TOKEN (fine-grained PAT, contents:write) lets the bot push to main through the
       # admin bypass of the branch ruleset. Falls back to GITHUB_TOKEN if unset.
@@ -35,15 +40,62 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
+      # enrich skips any repo whose pushed_at is unchanged, but data/enriched/ is
+      # gitignored, so CI always started cold and re-fetched all ~580 repos. Carrying
+      # the cache between runs cuts a steady-state run to the repos that actually moved.
+      # Cache entries are immutable, hence the run_id key with a rolling restore prefix.
+      - name: Restore enriched cache
+        uses: actions/cache/restore@v4
+        with:
+          path: data/enriched
+          key: enriched-${{ github.run_id }}
+          restore-keys: enriched-
+
+      # discover/enrich lean on the core and search APIs: 579 candidates x up to 4 calls
+      # each overruns GITHUB_TOKEN's 1,000 req/hr per-repo budget on a cold run. A PAT
+      # gets 5,000/hr in its own bucket. But a fine-grained PAT without public-repo read
+      # 404s on every external repo, and discover treats a 404 as "repo is gone" and drops
+      # the candidate — silent data loss. So prove the token can read a public repo first,
+      # and fall back to GITHUB_TOKEN if it cannot.
+      - name: Pick API token
+        id: tok
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: |
+          pick=github
+          if [ -n "$BOT_TOKEN" ]; then
+            code=$(curl -sS -o /dev/null -w '%{http_code}' \
+              -H "Authorization: Bearer $BOT_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/vercel/next.js)
+            if [ "$code" = "200" ]; then
+              pick=bot
+            else
+              echo "::warning::BOT_TOKEN cannot read public repos (HTTP $code) — falling back to GITHUB_TOKEN, expect rate-limit sleeps"
+            fi
+          fi
+          echo "pick=$pick" >> "$GITHUB_OUTPUT"
+          echo "api token: $pick"
+
       - name: Discover
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.tok.outputs.pick == 'bot' && secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
         run: pnpm discover ${{ inputs.quick && '--quick' || '' }}
 
       - name: Enrich
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.tok.outputs.pick == 'bot' && secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
         run: pnpm enrich
+
+      # Saved before Judge so a later failure, or the job timeout, still banks the
+      # fetches this run paid for.
+      - name: Save enriched cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/enriched
+          key: enriched-${{ github.run_id }}
 
       - name: Judge
         env:
