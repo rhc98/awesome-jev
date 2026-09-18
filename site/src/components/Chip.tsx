@@ -5,15 +5,17 @@ export function Chip({
   tone = 'plain',
 }: {
   children: ReactNode
-  tone?: 'plain' | 'accent'
+  tone?: 'plain' | 'outline' | 'accent'
 }) {
   const toneClass =
     tone === 'accent'
-      ? 'border-accent/40 bg-accent-soft text-accent'
-      : 'border-line bg-chip text-muted'
+      ? 'border-accent bg-accent-soft text-accent'
+      : tone === 'outline'
+        ? 'border-line bg-transparent text-body'
+        : 'border-transparent bg-chip text-body'
   return (
     <span
-      className={`inline-flex items-center rounded border px-1.5 py-0.5 text-[11px] leading-4 ${toneClass}`}
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[12px] leading-4 ${toneClass}`}
     >
       {children}
     </span>

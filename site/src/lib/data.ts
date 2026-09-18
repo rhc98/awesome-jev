@@ -8,6 +8,14 @@ export const calibration = (calibrationJson as unknown as Calibration | null) ??
 
 export const entries: Entry[] = curated.entries
 
+/** Policy gates; every verdict bar draws its tick from these. Never hard-code a threshold. */
+const gates = (curated.policy as { gate?: Record<string, unknown> } | undefined)?.gate ?? {}
+const gateOf = (key: string, fallback: number) =>
+  typeof gates[key] === 'number' ? (gates[key] as number) : fallback
+export const GATE = gateOf('listed_min', 0.6)
+export const CATEGORY_GATE = gateOf('category_conf_min', 0.5)
+export const SUBSTANCE_GATE = gateOf('substance_min', 0.5)
+
 export const CATEGORY_LABELS: Record<string, string> = {
   official: 'Official',
   sdk_client: 'SDKs and Clients',
