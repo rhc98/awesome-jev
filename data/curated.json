@@ -3,7 +3,7 @@
   "policy": {
     "qset": "v2",
     "gate": {
-      "listed_min": 0.6,
+      "listed_min": 0.5,
       "review_min": 0.3,
       "category_conf_min": 0.5,
       "meta_list_min": 0.7,
@@ -19,19 +19,19 @@
   },
   "stats": {
     "total": 579,
-    "listed": 369,
-    "review": 79,
+    "listed": 383,
+    "review": 65,
     "excluded": 131,
     "readme_picks": 115,
     "by_category": {
-      "research_eval": 71,
-      "application": 71,
-      "game_sim": 47,
-      "agent_tooling": 93,
+      "research_eval": 74,
+      "application": 72,
+      "game_sim": 50,
+      "agent_tooling": 99,
       "official": 4,
       "integration": 13,
       "meta_list": 8,
-      "sdk_client": 43,
+      "sdk_client": 44,
       "learning": 19
     },
     "overrides": 0
@@ -250,9 +250,9 @@
       "is_official": false,
       "category": "agent_tooling",
       "pattern": "routing",
-      "status": "review",
-      "status_reason": "genuine 0.52 below 0.6",
-      "readme_pick": false,
+      "status": "listed",
+      "status_reason": "gate passed",
+      "readme_pick": true,
       "jev": {
         "genuine": 0.52,
         "runtime_use": 0.07,
@@ -1253,7 +1253,7 @@
       "category": "sdk_client",
       "pattern": "routing",
       "status": "review",
-      "status_reason": "genuine 0.46 below 0.6",
+      "status_reason": "genuine 0.46 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.46,
@@ -2037,7 +2037,7 @@
       "category": "other",
       "pattern": "ranking",
       "status": "review",
-      "status_reason": "genuine 0.35 below 0.6",
+      "status_reason": "genuine 0.35 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.35,
@@ -3027,7 +3027,7 @@
       "pattern": "verification",
       "status": "listed",
       "status_reason": "gate passed",
-      "readme_pick": true,
+      "readme_pick": false,
       "jev": {
         "genuine": 0.96,
         "runtime_use": 0.94,
@@ -3922,8 +3922,8 @@
       "is_official": false,
       "category": "research_eval",
       "pattern": "control_loop",
-      "status": "review",
-      "status_reason": "genuine 0.56 below 0.6",
+      "status": "listed",
+      "status_reason": "gate passed",
       "readme_pick": false,
       "jev": {
         "genuine": 0.56,
@@ -3970,7 +3970,7 @@
       "category": "research_eval",
       "pattern": "routing",
       "status": "review",
-      "status_reason": "genuine 0.47 below 0.6",
+      "status_reason": "genuine 0.47 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.47,
@@ -5698,7 +5698,7 @@
       "category": "research_eval",
       "pattern": "extraction",
       "status": "review",
-      "status_reason": "genuine 0.46 below 0.6",
+      "status_reason": "genuine 0.46 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.46,
@@ -6862,8 +6862,8 @@
       "is_official": false,
       "category": "agent_tooling",
       "pattern": "unclear",
-      "status": "review",
-      "status_reason": "genuine 0.58 below 0.6",
+      "status": "listed",
+      "status_reason": "gate passed",
       "readme_pick": false,
       "jev": {
         "genuine": 0.58,
@@ -7255,7 +7255,7 @@
       "category": "research_eval",
       "pattern": "extraction",
       "status": "review",
-      "status_reason": "genuine 0.36 below 0.6",
+      "status_reason": "genuine 0.36 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.36,
@@ -7450,8 +7450,8 @@
       "is_official": false,
       "category": "agent_tooling",
       "pattern": "verification",
-      "status": "review",
-      "status_reason": "genuine 0.50 below 0.6",
+      "status": "listed",
+      "status_reason": "gate passed",
       "readme_pick": false,
       "jev": {
         "genuine": 0.5,
@@ -7500,7 +7500,7 @@
       "category": "application",
       "pattern": "feature_scoring",
       "status": "review",
-      "status_reason": "genuine 0.38 below 0.6",
+      "status_reason": "genuine 0.38 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.38,
@@ -8040,9 +8040,9 @@
       "is_official": false,
       "category": "application",
       "pattern": "verification",
-      "status": "review",
-      "status_reason": "genuine 0.51 below 0.6",
-      "readme_pick": false,
+      "status": "listed",
+      "status_reason": "gate passed",
+      "readme_pick": true,
       "jev": {
         "genuine": 0.51,
         "runtime_use": 0.16,
@@ -8638,7 +8638,7 @@
       "category": "research_eval",
       "pattern": "infra",
       "status": "review",
-      "status_reason": "genuine 0.41 below 0.6",
+      "status_reason": "genuine 0.41 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.41,
@@ -8883,7 +8883,7 @@
       "pattern": "ranking",
       "status": "listed",
       "status_reason": "gate passed",
-      "readme_pick": true,
+      "readme_pick": false,
       "jev": {
         "genuine": 0.96,
         "runtime_use": 0.97,
@@ -9088,7 +9088,7 @@
       "category": "agent_tooling",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.51 below 0.6",
+      "status_reason": "category confidence 0.34 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.51,
@@ -10995,7 +10995,7 @@
       "category": "integration",
       "pattern": "routing",
       "status": "review",
-      "status_reason": "genuine 0.32 below 0.6",
+      "status_reason": "genuine 0.32 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.32,
@@ -12400,8 +12400,8 @@
       "is_official": false,
       "category": "agent_tooling",
       "pattern": "verification",
-      "status": "review",
-      "status_reason": "genuine 0.59 below 0.6",
+      "status": "listed",
+      "status_reason": "gate passed",
       "readme_pick": false,
       "jev": {
         "genuine": 0.59,
@@ -14667,8 +14667,8 @@
       "is_official": false,
       "category": "game_sim",
       "pattern": "control_loop",
-      "status": "review",
-      "status_reason": "genuine 0.55 below 0.6",
+      "status": "listed",
+      "status_reason": "gate passed",
       "readme_pick": false,
       "jev": {
         "genuine": 0.55,
@@ -15542,7 +15542,7 @@
       "category": "other",
       "pattern": "verification",
       "status": "review",
-      "status_reason": "genuine 0.32 below 0.6",
+      "status_reason": "genuine 0.32 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.32,
@@ -17453,7 +17453,7 @@
       "category": "agent_tooling",
       "pattern": "verification",
       "status": "review",
-      "status_reason": "genuine 0.41 below 0.6",
+      "status_reason": "genuine 0.41 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.41,
@@ -17847,7 +17847,7 @@
       "category": "research_eval",
       "pattern": "routing",
       "status": "review",
-      "status_reason": "genuine 0.33 below 0.6",
+      "status_reason": "genuine 0.33 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.33,
@@ -18282,7 +18282,7 @@
       "category": "agent_tooling",
       "pattern": "infra",
       "status": "review",
-      "status_reason": "genuine 0.45 below 0.6",
+      "status_reason": "genuine 0.45 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.45,
@@ -18380,7 +18380,7 @@
       "category": "agent_tooling",
       "pattern": "verification",
       "status": "review",
-      "status_reason": "genuine 0.40 below 0.6",
+      "status_reason": "genuine 0.40 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.4,
@@ -18475,8 +18475,8 @@
       "is_official": false,
       "category": "sdk_client",
       "pattern": "infra",
-      "status": "review",
-      "status_reason": "genuine 0.54 below 0.6",
+      "status": "listed",
+      "status_reason": "gate passed",
       "readme_pick": false,
       "jev": {
         "genuine": 0.54,
@@ -19693,7 +19693,7 @@
       "category": "agent_tooling",
       "pattern": "ranking",
       "status": "review",
-      "status_reason": "genuine 0.38 below 0.6",
+      "status_reason": "genuine 0.38 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.38,
@@ -22087,8 +22087,8 @@
       "is_official": false,
       "category": "game_sim",
       "pattern": "control_loop",
-      "status": "review",
-      "status_reason": "genuine 0.59 below 0.6",
+      "status": "listed",
+      "status_reason": "gate passed",
       "readme_pick": false,
       "jev": {
         "genuine": 0.59,
@@ -22623,8 +22623,8 @@
       "is_official": false,
       "category": "game_sim",
       "pattern": "control_loop",
-      "status": "review",
-      "status_reason": "genuine 0.58 below 0.6",
+      "status": "listed",
+      "status_reason": "gate passed",
       "readme_pick": false,
       "jev": {
         "genuine": 0.58,
@@ -23621,8 +23621,8 @@
       "is_official": false,
       "category": "agent_tooling",
       "pattern": "infra",
-      "status": "review",
-      "status_reason": "genuine 0.58 below 0.6",
+      "status": "listed",
+      "status_reason": "gate passed",
       "readme_pick": false,
       "jev": {
         "genuine": 0.58,
@@ -24556,7 +24556,7 @@
       "category": "application",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.33 below 0.6",
+      "status_reason": "genuine 0.33 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.33,
@@ -25092,7 +25092,7 @@
       "category": "research_eval",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.49 below 0.6",
+      "status_reason": "genuine 0.49 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.49,
@@ -25333,8 +25333,8 @@
       "is_official": false,
       "category": "agent_tooling",
       "pattern": "verification",
-      "status": "review",
-      "status_reason": "genuine 0.54 below 0.6",
+      "status": "listed",
+      "status_reason": "gate passed",
       "readme_pick": false,
       "jev": {
         "genuine": 0.54,
@@ -25479,7 +25479,7 @@
       "category": "agent_tooling",
       "pattern": "routing",
       "status": "review",
-      "status_reason": "genuine 0.38 below 0.6",
+      "status_reason": "genuine 0.38 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.38,
@@ -25528,7 +25528,7 @@
       "category": "application",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.42 below 0.6",
+      "status_reason": "genuine 0.42 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.42,
@@ -25718,7 +25718,7 @@
       "category": "agent_tooling",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.46 below 0.6",
+      "status_reason": "genuine 0.46 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.46,
@@ -25767,7 +25767,7 @@
       "category": "application",
       "pattern": "ranking",
       "status": "review",
-      "status_reason": "genuine 0.39 below 0.6",
+      "status_reason": "genuine 0.39 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.39,
@@ -25816,7 +25816,7 @@
       "category": "application",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.46 below 0.6",
+      "status_reason": "genuine 0.46 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.46,
@@ -26245,7 +26245,7 @@
       "category": "application",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.35 below 0.6",
+      "status_reason": "genuine 0.35 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.35,
@@ -26294,7 +26294,7 @@
       "category": "application",
       "pattern": "control_loop",
       "status": "review",
-      "status_reason": "genuine 0.42 below 0.6",
+      "status_reason": "genuine 0.42 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.42,
@@ -26388,7 +26388,7 @@
       "category": "game_sim",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.37 below 0.6",
+      "status_reason": "genuine 0.37 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.37,
@@ -26438,7 +26438,7 @@
       "category": "learning",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.43 below 0.6",
+      "status_reason": "genuine 0.43 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.43,
@@ -26626,8 +26626,8 @@
       "is_official": false,
       "category": "research_eval",
       "pattern": "ranking",
-      "status": "review",
-      "status_reason": "genuine 0.51 below 0.6",
+      "status": "listed",
+      "status_reason": "gate passed",
       "readme_pick": false,
       "jev": {
         "genuine": 0.51,
@@ -26724,7 +26724,7 @@
       "category": "application",
       "pattern": "feature_scoring",
       "status": "review",
-      "status_reason": "genuine 0.33 below 0.6",
+      "status_reason": "genuine 0.33 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.33,
@@ -26821,7 +26821,7 @@
       "category": "application",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.31 below 0.6",
+      "status_reason": "genuine 0.31 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.31,
@@ -27014,8 +27014,8 @@
       "is_official": false,
       "category": "research_eval",
       "pattern": "routing",
-      "status": "review",
-      "status_reason": "genuine 0.55 below 0.6",
+      "status": "listed",
+      "status_reason": "gate passed",
       "readme_pick": false,
       "jev": {
         "genuine": 0.55,
@@ -27113,7 +27113,7 @@
       "category": "other",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.50 below 0.6",
+      "status_reason": "category confidence 0.33 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.5,
@@ -27306,7 +27306,7 @@
       "category": "application",
       "pattern": "routing",
       "status": "review",
-      "status_reason": "genuine 0.44 below 0.6",
+      "status_reason": "genuine 0.44 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.44,
@@ -27354,7 +27354,7 @@
       "category": "game_sim",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.33 below 0.6",
+      "status_reason": "genuine 0.33 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.33,
@@ -27401,7 +27401,7 @@
       "category": "agent_tooling",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.39 below 0.6",
+      "status_reason": "genuine 0.39 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.39,
@@ -27542,7 +27542,7 @@
       "category": "sdk_client",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.37 below 0.6",
+      "status_reason": "genuine 0.37 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.37,
@@ -27638,7 +27638,7 @@
       "category": "research_eval",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.36 below 0.6",
+      "status_reason": "genuine 0.36 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.36,
@@ -27688,7 +27688,7 @@
       "category": "sdk_client",
       "pattern": "infra",
       "status": "review",
-      "status_reason": "genuine 0.38 below 0.6",
+      "status_reason": "genuine 0.38 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.38,
@@ -27735,7 +27735,7 @@
       "category": "learning",
       "pattern": "unclear",
       "status": "review",
-      "status_reason": "genuine 0.39 below 0.6",
+      "status_reason": "genuine 0.39 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.39,

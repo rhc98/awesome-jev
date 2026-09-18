@@ -13,9 +13,10 @@ import { type CATEGORIES, QSET } from './questions.v2.js'
 
 export const POLICY = {
   qset: QSET,
-  // v1 run on 40 repos: noise scored ≤0.16, genuine projects 0.46–0.89 → thresholds provisional until goldset.
+  // Goldset v2 (80 repos, 2026-09-18): no false positives at genuine ≥0.5; 0.6→0.5 lifts recall 0.79→0.84
+  // with precision 1.00. 0.4 admits the first noise (a file-less repo at 0.44). See data/calibration.json.
   gate: {
-    listed_min: 0.6,
+    listed_min: 0.5,
     review_min: 0.3,
     category_conf_min: 0.5,
     meta_list_min: 0.7,

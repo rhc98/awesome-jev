@@ -51,6 +51,10 @@ function main() {
     .filter(([repo]) => latest.has(repo))
     .map(([repo, g]) => ({ repo, g, a: (latest.get(repo) as Judgment).answers }))
   const missing = Object.keys(gold).filter(r => !latest.has(r))
+  const curatedFile = join(DATA, 'curated.json')
+  const gate: number = existsSync(curatedFile)
+    ? (JSON.parse(readFileSync(curatedFile, 'utf8')).policy?.gate?.listed_min ?? 0.6)
+    : 0.6
   console.log(
     `goldset ${Object.keys(gold).length}, judged ${rows.length}, unjudged ${missing.length}`,
   )
@@ -80,9 +84,9 @@ function main() {
       `${t.toFixed(1)}  ${String(TP).padStart(3)} ${String(FP).padStart(3)} ${String(FN).padStart(3)} ${String(TN).padStart(3)}  ${prec.toFixed(2)}  ${rec.toFixed(2)}  ${f1.toFixed(2)}`,
     )
   }
-  const errs = rows.filter(r => r.a.genuine.noul >= 0.6 !== r.g.genuine)
+  const errs = rows.filter(r => r.a.genuine.noul >= gate !== r.g.genuine)
   if (errs.length) {
-    console.log('  disagreements @0.6:')
+    console.log(`  disagreements @${gate} (policy listed_min):`)
     for (const r of errs)
       console.log(
         `    ${r.repo.padEnd(45)} jev=${r.a.genuine.noul.toFixed(2)} human=${r.g.genuine} ${r.g.note ?? ''}`,
@@ -145,6 +149,7 @@ function main() {
     qset: QSET,
     computed_at: new Date().toISOString(),
     n: rows.length,
+    gate_listed_min: gate,
     gate_sweep: sweep,
     category_agreement: cat.length
       ? cat.filter(r => r.a.category.choice === r.g.category).length / cat.length
