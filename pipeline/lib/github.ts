@@ -17,6 +17,12 @@ const TOKEN = token()
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
+// Transient failures (5xx) and rate-limit windows get separate budgets: a long
+// code-search reset window must not eat the retry budget meant for real errors.
+const MAX_ATTEMPTS = 6
+const MAX_RATE_WAITS = 10
+const MAX_SLEEP_MS = 15 * 60_000
+
 export type GhOpts = { accept?: string; raw?: boolean; allow404?: boolean }
 
 /** GET with rate-limit aware retry. Returns parsed JSON (or text when raw). */
@@ -27,7 +33,9 @@ export async function gh<T = any>(
 ): Promise<T | null> {
   const url = new URL(path.startsWith('http') ? path : API + path)
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v))
-  for (let attempt = 0; attempt < 6; attempt++) {
+  let attempt = 0
+  let rateWaits = 0
+  while (attempt < MAX_ATTEMPTS && rateWaits < MAX_RATE_WAITS) {
     const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${TOKEN}`,
@@ -41,13 +49,21 @@ export async function gh<T = any>(
     if (res.status === 403 || res.status === 429) {
       const reset = Number(res.headers.get('x-ratelimit-reset') ?? 0) * 1000
       const retryAfter = Number(res.headers.get('retry-after') ?? 0) * 1000
-      const wait = Math.max(retryAfter, reset ? reset - Date.now() + 1000 : 0, 15000)
-      console.error(`  rate limited on ${url.pathname}, waiting ${Math.round(wait / 1000)}s`)
-      await sleep(Math.min(wait, 90000))
+      // Sleep the full reset window: waking early just burns another 403.
+      const wait = Math.min(
+        Math.max(retryAfter, reset ? reset - Date.now() + 1000 : 0, 15000),
+        MAX_SLEEP_MS,
+      )
+      rateWaits++
+      console.error(
+        `  rate limited on ${url.pathname}, waiting ${Math.round(wait / 1000)}s (${rateWaits}/${MAX_RATE_WAITS})`,
+      )
+      await sleep(wait)
       continue
     }
     if (res.status >= 500) {
       await sleep(2000 * (attempt + 1))
+      attempt++
       continue
     }
     if (!res.ok) throw new Error(`GitHub ${res.status} ${url}: ${(await res.text()).slice(0, 200)}`)
