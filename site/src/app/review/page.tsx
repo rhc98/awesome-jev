@@ -12,10 +12,13 @@ import {
   patternLabel,
 } from '@/lib/data'
 import { compactNumber } from '@/lib/format'
+import { openGraph } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Review queue',
   description: 'Repositories Jev was not confident enough about to list or exclude.',
+  alternates: { canonical: '/review/' },
+  openGraph: openGraph({ url: '/review/' }),
 }
 
 export default function ReviewPage() {

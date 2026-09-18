@@ -8,10 +8,13 @@ import {
   REPO_URL,
 } from '@/lib/data'
 import { flattenObject, formatDateTime, num, pct } from '@/lib/format'
+import { openGraph } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'How it works',
   description: 'The five-stage pipeline behind Awesome Jev, its policy, and its calibration.',
+  alternates: { canonical: '/how-it-works/' },
+  openGraph: openGraph({ url: '/how-it-works/' }),
 }
 
 const STEPS = [

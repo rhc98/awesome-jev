@@ -14,6 +14,7 @@ import {
   splitRepo,
 } from '@/lib/data'
 import { formatDate, formatDateTime, num } from '@/lib/format'
+import { openGraph } from '@/lib/seo'
 import type { Entry } from '@/lib/types'
 
 type Params = { owner: string; name: string }
@@ -25,11 +26,25 @@ export function generateStaticParams(): Params[] {
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { owner, name } = await params
   const entry = findEntry(owner, name)
-  if (!entry) return { title: 'Not found' }
+  if (!entry) return { title: 'Not found', robots: { index: false } }
+  const path = `/r/${owner}/${name}/`
+  const description = trimDescription(
+    entry.description ??
+      `${categoryLabel(entry.category)} · ${STATUS_LABELS[entry.status]} · genuine ${num(entry.jev.genuine)}`,
+  )
   return {
     title: entry.name,
-    description: entry.description ?? `Jev judgment for ${entry.repo}.`,
+    description,
+    alternates: { canonical: path },
+    openGraph: openGraph({ title: entry.repo, description, url: path }),
+    // Excluded pages stay reachable for transparency but are thin; keep them out of the index.
+    robots: entry.status === 'excluded' ? { index: false, follow: true } : undefined,
   }
+}
+
+function trimDescription(text: string, max = 160): string {
+  const t = text.trim()
+  return t.length <= max ? t : `${t.slice(0, max - 1).trimEnd()}…`
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
