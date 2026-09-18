@@ -10,6 +10,7 @@
     "format": "biome check --write ."
   },
   "dependencies": {
+    "@tanstack/react-virtual": "^3.14.13",
     "next": "15.5.25",
     "react": "19.3.0",
     "react-dom": "19.3.0"

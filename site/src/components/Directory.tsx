@@ -1,6 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useWindowVirtualizer } from '@tanstack/react-virtual'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EntryCard } from '@/components/EntryCard'
 import { EntryRow } from '@/components/EntryRow'
 import { categories, categoryLabel, entries, languages, patternLabel, patterns } from '@/lib/data'
@@ -29,6 +30,23 @@ const DEFAULTS = {
   sort: 'score' as SortKey,
   view: 'rows' as View,
 }
+
+// The virtualizer has nothing to measure during `output: export` prerender, so the
+// first slice is rendered plainly and swapped for the virtual window after mount.
+// That keeps real entries in the static HTML — an empty scroll spacer would drop
+// the default grid the page is built to ship — while capping the hydrated DOM.
+const STATIC_ITEMS = 24
+
+// Matches the sm:grid-cols-2 / lg:grid-cols-3 breakpoints on the card grid.
+const CARD_BREAKPOINTS = [
+  { query: '(min-width: 1024px)', lanes: 3 },
+  { query: '(min-width: 640px)', lanes: 2 },
+]
+
+// Fallback heights until a row reports its own; over-estimating is cheaper than
+// under-estimating, which makes the scrollbar jump as real sizes come in.
+const ESTIMATE = { rows: 132, cards: 196 }
+const CARD_GAP = 12 // gap-3
 
 function matchesQuery(entry: Entry, query: string): boolean {
   if (!query) return true
@@ -127,6 +145,59 @@ export function Directory() {
     }
     return counts
   }, [status])
+
+  const listEl = useRef<HTMLElement | null>(null)
+  const [listTop, setListTop] = useState(0)
+  const [mounted, setMounted] = useState(false)
+  const [cardLanes, setCardLanes] = useState(1)
+
+  useEffect(() => setMounted(true), [])
+
+  // A callback ref rather than useRef: the virtualizer needs the list's document
+  // offset as an option at render time, so the measurement has to reach state the
+  // moment the element attaches. Works for both the <ul> and the card <div>.
+  const attachList = useCallback((el: HTMLElement | null) => {
+    listEl.current = el
+    setListTop(el?.offsetTop ?? 0)
+  }, [])
+
+  useEffect(() => {
+    const remeasure = () => setListTop(listEl.current?.offsetTop ?? 0)
+    window.addEventListener('resize', remeasure)
+    return () => window.removeEventListener('resize', remeasure)
+  }, [])
+
+  useEffect(() => {
+    if (view !== 'cards') return
+    const lists = CARD_BREAKPOINTS.map(b => window.matchMedia(b.query))
+    const sync = () => {
+      const hit = lists.findIndex(l => l.matches)
+      setCardLanes(hit === -1 ? 1 : CARD_BREAKPOINTS[hit].lanes)
+    }
+    sync()
+    for (const l of lists) l.addEventListener('change', sync)
+    return () => {
+      for (const l of lists) l.removeEventListener('change', sync)
+    }
+  }, [view])
+
+  const lanes = view === 'cards' ? cardLanes : 1
+  const virtualizer = useWindowVirtualizer({
+    count: results.length,
+    estimateSize: () => (view === 'cards' ? ESTIMATE.cards : ESTIMATE.rows),
+    overscan: 6,
+    lanes,
+    // getTotalSize() is measured from the document top, so the list has to declare
+    // where it starts or every row sits one header's worth too low.
+    scrollMargin: listTop,
+  })
+
+  // Row heights depend on the filtered set (descriptions wrap differently), so drop
+  // stale measurements when the results or the column count change.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-measure on result/lane change
+  useEffect(() => {
+    virtualizer.measure()
+  }, [results, lanes, virtualizer])
 
   const hasFilters =
     Boolean(query || pattern || language || selectedCategories.length) ||
@@ -308,17 +379,69 @@ export function Directory() {
           <p className="py-16 text-center text-[14px] text-muted">
             No entries match these filters.
           </p>
+        ) : !mounted ? (
+          // Prerender and first hydration pass: a plain slice, so the markup the
+          // client starts from is identical to the exported HTML.
+          view === 'cards' ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {results.slice(0, STATIC_ITEMS).map(entry => (
+                <EntryCard key={entry.repo} entry={entry} />
+              ))}
+            </div>
+          ) : (
+            <ul className="border-line border-t">
+              {results.slice(0, STATIC_ITEMS).map(entry => (
+                <EntryRow key={entry.repo} entry={entry} />
+              ))}
+            </ul>
+          )
         ) : view === 'cards' ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {results.map(entry => (
-              <EntryCard key={entry.repo} entry={entry} />
-            ))}
+          <div ref={attachList} className="relative" style={{ height: virtualizer.getTotalSize() }}>
+            {virtualizer.getVirtualItems().map(item => {
+              const entry = results[item.index]
+              return (
+                <div
+                  key={entry.repo}
+                  data-index={item.index}
+                  ref={virtualizer.measureElement}
+                  className="absolute top-0 pb-3"
+                  style={{
+                    left: `${(item.lane * 100) / lanes}%`,
+                    width: `${100 / lanes}%`,
+                    paddingLeft: item.lane === 0 ? 0 : CARD_GAP / 2,
+                    paddingRight: item.lane === lanes - 1 ? 0 : CARD_GAP / 2,
+                    transform: `translateY(${item.start - virtualizer.options.scrollMargin}px)`,
+                  }}
+                >
+                  <EntryCard entry={entry} />
+                </div>
+              )
+            })}
           </div>
         ) : (
-          <ul className="border-line border-t">
-            {results.map(entry => (
-              <EntryRow key={entry.repo} entry={entry} />
-            ))}
+          <ul
+            ref={attachList}
+            className="relative border-line border-t"
+            style={{ height: virtualizer.getTotalSize() }}
+          >
+            {virtualizer.getVirtualItems().map(item => {
+              const entry = results[item.index]
+              return (
+                <EntryRow
+                  key={entry.repo}
+                  entry={entry}
+                  index={item.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${item.start - virtualizer.options.scrollMargin}px)`,
+                  }}
+                />
+              )
+            })}
           </ul>
         )}
       </div>
