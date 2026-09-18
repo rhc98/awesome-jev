@@ -1,7 +1,15 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Directory } from '@/components/Directory'
 import { curated } from '@/lib/data'
 import { formatDate } from '@/lib/format'
+import { openGraph } from '@/lib/seo'
+
+// Filters live in the query string; every combination is the same document.
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+  openGraph: openGraph({ url: '/' }),
+}
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (

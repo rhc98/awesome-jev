@@ -2,22 +2,18 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SiteNav } from '@/components/SiteNav'
+import { openGraph, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/seo'
 import './globals.css'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://awesome-jev.xyz'),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Awesome Jev',
-    template: '%s — Awesome Jev',
+    default: SITE_NAME,
+    template: `%s — ${SITE_NAME}`,
   },
-  description: 'Projects built on Jev, curated by Jev.',
-  openGraph: {
-    title: 'Awesome Jev',
-    description: 'Projects built on Jev, curated by Jev.',
-    url: 'https://awesome-jev.xyz',
-    siteName: 'Awesome Jev',
-    type: 'website',
-  },
+  description: SITE_DESCRIPTION,
+  openGraph: openGraph({ title: SITE_NAME, description: SITE_DESCRIPTION, url: '/' }),
+  twitter: { card: 'summary_large_image' },
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
