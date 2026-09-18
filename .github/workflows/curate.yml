@@ -112,7 +112,20 @@ jobs:
           git add data/candidates.jsonl data/repos.jsonl data/judgments.jsonl data/curated.json README.md
           if git diff --cached --quiet; then
             echo "no changes"
-          else
-            git commit -m "curate: $(date -u +%Y-%m-%d) — $(node -e 'const c=require("./data/curated.json").stats;console.log(`${c.total} judged, ${c.listed} listed, ${c.review} review`)')"
-            git push
+            exit 0
           fi
+          git commit -m "curate: $(date -u +%Y-%m-%d) — $(node -e 'const c=require("./data/curated.json").stats;console.log(`${c.total} judged, ${c.listed} listed, ${c.review} review`)')"
+          # A run takes minutes to an hour, and the concurrency group only holds off other
+          # curate runs — a pull request merged meanwhile moves main and the push is rejected,
+          # throwing away everything the run just computed. This commit only carries generated
+          # data, so replaying it on the new tip is safe. A conflict means the artifacts were
+          # edited by hand, which should fail loudly rather than be resolved here.
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "push rejected (attempt $attempt), replaying onto origin/main"
+            git pull --rebase origin main
+          done
+          echo "::error::Could not push after 3 attempts; main is moving faster than the run"
+          exit 1
