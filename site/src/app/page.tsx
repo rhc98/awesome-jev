@@ -13,9 +13,9 @@ export const metadata: Metadata = {
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="flex flex-col">
-      <span className="font-mono text-lg tabular-nums leading-tight">{value}</span>
-      <span className="text-[12px] text-muted uppercase tracking-wide">{label}</span>
+    <div className="flex flex-col gap-0.5">
+      <span className="num font-medium font-mono text-[22px] text-fg leading-7">{value}</span>
+      <span className="cap">{label}</span>
     </div>
   )
 }
@@ -25,9 +25,11 @@ export default function HomePage() {
 
   return (
     <div>
-      <section className="py-8">
-        <h1 className="font-semibold text-2xl tracking-tight sm:text-3xl">Awesome Jev</h1>
-        <p className="mt-2 max-w-2xl text-muted">
+      <section className="pt-8 pb-6">
+        <h1 className="font-semibold text-[28px] leading-9 tracking-[-0.02em] sm:text-[32px] sm:leading-10">
+          Awesome Jev
+        </h1>
+        <p className="mt-2 max-w-2xl text-body">
           Projects built on Jev, curated by Jev. Every repository below was collected from GitHub
           and judged by Jev in a single call. Code applies the policy; nothing was hand-picked.{' '}
           <Link href="/how-it-works" className="text-accent hover:underline">
@@ -36,7 +38,7 @@ export default function HomePage() {
           .
         </p>
 
-        <div className="mt-6 flex flex-wrap gap-x-8 gap-y-4 rounded-md border border-line bg-panel-alt px-4 py-3">
+        <div className="mt-6 flex flex-wrap gap-x-8 gap-y-4 rounded-md bg-panel-alt px-4 py-3.5">
           <Stat label="judged" value={stats.total} />
           <Stat label="listed" value={stats.listed} />
           <Stat label="review" value={stats.review} />

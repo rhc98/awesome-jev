@@ -7,10 +7,12 @@ import {
   categoryLabel,
   entries,
   findEntry,
+  GATE,
   githubUrl,
   homepageUrl,
   patternLabel,
   STATUS_LABELS,
+  SUBSTANCE_GATE,
   splitRepo,
 } from '@/lib/data'
 import { formatDate, formatDateTime, num } from '@/lib/format'
@@ -49,8 +51,8 @@ function trimDescription(text: string, max = 160): string {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="border-line border-t py-6">
-      <h2 className="mb-4 font-medium text-[13px] text-muted uppercase tracking-wide">{title}</h2>
+    <section className="border-line border-t pt-6 pb-8">
+      <h2 className="cap mb-4">{title}</h2>
       {children}
     </section>
   )
@@ -60,7 +62,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex justify-between gap-4 border-line border-b py-1.5 text-[13px] last:border-b-0">
       <span className="text-muted">{label}</span>
-      <span className="text-right font-mono tabular-nums">{value}</span>
+      <span className="num text-right font-mono text-fg">{value}</span>
     </div>
   )
 }
@@ -93,25 +95,27 @@ export default async function EntryPage({ params }: { params: Promise<Params> })
 
   return (
     <article className="py-8">
-      <p className="text-[13px] text-muted">
-        <Link href="/" className="hover:text-accent">
-          Index
+      <p className="font-mono text-[13px] text-muted">
+        <Link href="/" className="hover:text-fg">
+          index
         </Link>{' '}
         / {entry.repo}
       </p>
 
-      <h1 className="mt-2 font-semibold text-2xl tracking-tight">{entry.name}</h1>
-      <p className="mt-2 max-w-2xl text-muted">
+      <h1 className="mt-2 font-semibold text-[24px] leading-8 tracking-[-0.015em]">{entry.name}</h1>
+      <p className="mt-2 max-w-2xl text-body">
         {entry.description?.trim() || 'No description provided.'}
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-1.5">
-        <Chip tone="accent">{categoryLabel(entry.category)}</Chip>
+        <Chip tone="outline">{categoryLabel(entry.category)}</Chip>
         <Chip>{patternLabel(entry.pattern)}</Chip>
-        {entry.language ? <Chip>{entry.language}</Chip> : null}
         <Chip>{STATUS_LABELS[entry.status] ?? entry.status}</Chip>
-        {entry.readme_pick ? <Chip tone="accent">README pick</Chip> : null}
-        {entry.is_official ? <Chip tone="accent">Official</Chip> : null}
+        {entry.language ? (
+          <span className="font-mono text-[12px] text-muted">{entry.language}</span>
+        ) : null}
+        {entry.readme_pick ? <span className="cap text-accent">readme pick</span> : null}
+        {entry.is_official ? <span className="cap text-accent">official</span> : null}
       </div>
 
       <div className="mt-4 flex flex-wrap gap-4 text-[13px]">
@@ -152,7 +156,7 @@ export default async function EntryPage({ params }: { params: Promise<Params> })
 
       <Section title="Judgment">
         <div className="grid gap-4 sm:grid-cols-2">
-          <ProbBar label="Genuine Jev project" value={entry.jev.genuine} />
+          <ProbBar label="Genuine Jev project" value={entry.jev.genuine} gate={GATE} />
           <ProbBar label="Uses Jev at runtime" value={entry.jev.runtime_use} />
           <ProbBar label="Is a meta list" value={entry.jev.is_meta_list} />
           <ProbBar label="Is a reimplementation" value={entry.jev.is_reimpl} />
@@ -161,7 +165,7 @@ export default async function EntryPage({ params }: { params: Promise<Params> })
 
       <Section title="Quality scales">
         <div className="grid gap-4 sm:grid-cols-3">
-          <ScaleBar label="Substance" value={entry.jev.substance} />
+          <ScaleBar label="Substance" value={entry.jev.substance} gate={SUBSTANCE_GATE} />
           <ScaleBar label="Docs" value={entry.jev.docs} />
           <ScaleBar label="Novelty" value={entry.jev.novelty} />
         </div>

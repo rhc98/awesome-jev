@@ -78,7 +78,7 @@ function Table({ head, rows }: { head: string[]; rows: (string | number)[][] }) 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="border-line border-t py-6">
-      <h2 className="mb-4 font-medium text-[13px] text-muted uppercase tracking-wide">{title}</h2>
+      <h2 className="cap mb-4">{title}</h2>
       {children}
     </section>
   )
@@ -89,8 +89,8 @@ export default function HowItWorksPage() {
 
   return (
     <div className="py-8">
-      <h1 className="font-semibold text-2xl tracking-tight">How it works</h1>
-      <p className="mt-2 max-w-2xl text-muted">
+      <h1 className="font-semibold text-[28px] leading-9 tracking-[-0.02em]">How it works</h1>
+      <p className="mt-2 max-w-2xl text-body">
         Awesome Jev is a list that judges itself. Five stages run end to end; the only place a model
         is called is stage three, and the only place a human decides anything is an override with a
         written reason.

@@ -1,17 +1,6 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import { MiniMeter } from '@/components/Bars'
-import { Chip } from '@/components/Chip'
-import {
-  categoryLabel,
-  curated,
-  entries,
-  entryHref,
-  githubUrl,
-  ISSUE_TEMPLATE_URL,
-  patternLabel,
-} from '@/lib/data'
-import { compactNumber } from '@/lib/format'
+import { EntryRow } from '@/components/EntryRow'
+import { curated, entries, ISSUE_TEMPLATE_URL } from '@/lib/data'
 import { openGraph } from '@/lib/seo'
 
 export const metadata: Metadata = {
@@ -28,8 +17,8 @@ export default function ReviewPage() {
 
   return (
     <div className="py-8">
-      <h1 className="font-semibold text-2xl tracking-tight">Review queue</h1>
-      <p className="mt-2 max-w-2xl text-muted">
+      <h1 className="font-semibold text-[28px] leading-9 tracking-[-0.02em]">Review queue</h1>
+      <p className="mt-2 max-w-2xl text-body">
         These repositories fell between the gates: Jev was confident enough not to drop them, but
         not confident enough to list them. The policy leaves them here rather than guessing. A human
         reading one repository for thirty seconds usually settles it.
@@ -48,7 +37,7 @@ export default function ReviewPage() {
         template. Corrections become overrides in the data, and overrides feed the calibration set.
       </p>
 
-      <p className="mt-6 text-[13px] text-muted">
+      <p className="num mt-6 font-mono text-[13px] text-muted">
         {queue.length} of {curated.stats.total} judged repositories are awaiting review.
       </p>
 
@@ -57,52 +46,9 @@ export default function ReviewPage() {
           The queue is empty. Every judged repository cleared a gate.
         </p>
       ) : (
-        <ul className="mt-4 flex flex-col gap-2">
+        <ul className="mt-4 border-line border-t">
           {queue.map(entry => (
-            <li
-              key={entry.repo}
-              className="flex flex-col gap-2 rounded-md border border-line bg-panel p-3.5"
-            >
-              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                <h2 className="font-medium">
-                  <a
-                    href={githubUrl(entry.repo)}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="hover:text-accent"
-                  >
-                    {entry.repo}
-                  </a>
-                </h2>
-                <span className="font-mono text-[12px] text-muted tabular-nums">
-                  ★ {compactNumber(entry.stars)}
-                </span>
-              </div>
-
-              <p className="text-[13px] text-muted leading-snug">
-                {entry.description?.trim() || 'No description provided.'}
-              </p>
-
-              <p className="font-mono text-[12px] text-muted">
-                held because: {entry.status_reason}
-              </p>
-
-              <div className="flex flex-wrap items-center gap-1.5">
-                <Chip tone="accent">{categoryLabel(entry.category)}</Chip>
-                <Chip>{patternLabel(entry.pattern)}</Chip>
-                {entry.language ? <Chip>{entry.language}</Chip> : null}
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-line border-t pt-2">
-                <MiniMeter label="genuine" value={entry.jev.genuine} />
-                <Link
-                  href={entryHref(entry.repo)}
-                  className="text-[12px] text-accent hover:underline"
-                >
-                  Full judgment
-                </Link>
-              </div>
-            </li>
+            <EntryRow key={entry.repo} entry={entry} />
           ))}
         </ul>
       )}
