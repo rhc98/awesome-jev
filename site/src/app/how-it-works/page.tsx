@@ -1,5 +1,12 @@
 import type { Metadata } from 'next'
-import { calibration, curated, ISSUE_TEMPLATE_URL, REPO_URL } from '@/lib/data'
+import {
+  calibration,
+  categoryLabel,
+  curated,
+  entryHref,
+  ISSUE_TEMPLATE_URL,
+  REPO_URL,
+} from '@/lib/data'
 import { flattenObject, formatDateTime, num, pct } from '@/lib/format'
 
 export const metadata: Metadata = {
@@ -141,7 +148,11 @@ export default function HowItWorksPage() {
             <dl className="mt-4 flex flex-wrap gap-x-10 gap-y-2 text-[13px]">
               <div>
                 <dt className="text-muted">Category agreement</dt>
-                <dd className="font-mono tabular-nums">{pct(calibration.category_agreement, 1)}</dd>
+                <dd className="font-mono tabular-nums">
+                  {calibration.category_agreement === null
+                    ? '—'
+                    : pct(calibration.category_agreement, 1)}
+                </dd>
               </div>
               <div>
                 <dt className="text-muted">Gold set size</dt>
@@ -168,17 +179,182 @@ export default function HowItWorksPage() {
       </Section>
 
       <Section title="Calibration report">
-        <div className="rounded-md border border-line border-dashed p-6">
-          <p className="font-mono text-[12px] text-muted uppercase tracking-wide">
-            Placeholder — to be filled
+        {calibration ? (
+          <div className="max-w-2xl space-y-8 text-[14px]">
+            <div className="space-y-3">
+              <p>
+                The gold set is {calibration.n} repositories labelled by hand from README, manifests
+                and code-search evidence: a first pass by an assistant, every label reviewed by the
+                maintainer. It was sampled in strata so the interesting cases are over-represented:
+                noise that keyword search drags in, repositories Jev scored near the gate, and
+                genuine projects spread across category, stars and language. Two fields are labelled
+                separately on purpose: <em>genuine</em> asks whether the repository is about Jev at
+                all, <em>substance</em> how real it is. A one-line scaffold with a TypeSafe
+                dependency is genuine and empty.
+              </p>
+              <p>
+                The full write-up, including five failure cases and what each one says about the
+                evidence or the question set, is in{' '}
+                <a
+                  href={`${REPO_URL}/blob/main/docs/calibration.md`}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="text-accent hover:underline"
+                >
+                  docs/calibration.md
+                </a>
+                .
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="font-medium">Threshold</h3>
+              <p>
+                The listed gate is genuine ≥ {num(calibration.gate_listed_min ?? 0.6, 1)}. On the
+                gold set no repository a human called noise scores 0.5 or higher, so lowering the
+                gate from 0.6 buys recall without paying precision; 0.4 admits the first noise. A
+                separate substance floor keeps empty scaffolds in review even when they pass the
+                gate. The sweep above over-states the miss rate: repositories near the gate were
+                deliberately over-sampled.
+              </p>
+            </div>
+
+            {calibration.category ? (
+              <div className="space-y-3">
+                <h3 className="font-medium">Category</h3>
+                <p>
+                  Jev and the human label agree on{' '}
+                  {calibration.category.agreement !== null
+                    ? pct(calibration.category.agreement, 0)
+                    : '—'}{' '}
+                  of {calibration.category.n} categorised repositories. Where they disagree:
+                </p>
+                <Table
+                  head={['Human', 'Jev', 'Count']}
+                  rows={calibration.category.confusion
+                    .filter(c => c.human !== c.jev)
+                    .map(c => [categoryLabel(c.human), categoryLabel(c.jev), c.count])}
+                />
+                <p className="text-muted">
+                  Reported confidence tracks accuracy, which is what makes the category-confidence
+                  threshold in the policy meaningful:
+                </p>
+                <Table
+                  head={['Confidence', 'n', 'Accuracy']}
+                  rows={calibration.category.reliability.map(r => [
+                    `${num(r.lo, 1)} – ${num(r.hi, 1)}`,
+                    r.n,
+                    pct(r.acc, 0),
+                  ])}
+                />
+              </div>
+            ) : null}
+
+            {calibration.substance ? (
+              <div className="space-y-3">
+                <h3 className="font-medium">Substance</h3>
+                <p>
+                  Jev's 0–3 substance score against the human one: Spearman{' '}
+                  {num(calibration.substance.spearman, 2)}, mean absolute error{' '}
+                  {num(calibration.substance.mae, 2)} (n={calibration.substance.n}). Good enough to
+                  rank within a category, not to be read as a grade.
+                </p>
+              </div>
+            ) : null}
+
+            {calibration.disagreements?.length ? (
+              <div className="space-y-3">
+                <h3 className="font-medium">Where Jev and the humans disagree on the gate</h3>
+                <p className="text-muted">
+                  Every disagreement at the current gate. Most are repositories whose README says
+                  nothing about Jev while the code uses it; README-only evidence cannot see those.
+                </p>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[32rem] border-collapse text-[13px]">
+                    <thead>
+                      <tr className="border-line border-b text-left text-muted">
+                        <th className="py-1.5 pr-4 font-medium">Repository</th>
+                        <th className="py-1.5 pr-4 font-medium">Jev</th>
+                        <th className="py-1.5 pr-4 font-medium">Human</th>
+                        <th className="py-1.5 pr-4 font-medium">Why</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {calibration.disagreements.map(d => (
+                        <tr key={d.repo} className="border-line border-b last:border-b-0 align-top">
+                          <td className="py-1.5 pr-4 font-mono">
+                            <a href={entryHref(d.repo)} className="text-accent hover:underline">
+                              {d.repo}
+                            </a>
+                          </td>
+                          <td className="py-1.5 pr-4 font-mono tabular-nums">{num(d.jev, 2)}</td>
+                          <td className="py-1.5 pr-4 font-mono">{d.human ? 'genuine' : 'noise'}</td>
+                          <td className="py-1.5 pr-4 text-muted">{d.note}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
+
+            {calibration.qset_diff ? (
+              <div className="space-y-3">
+                <h3 className="font-medium">
+                  Question set {calibration.qset_diff.prev} → {calibration.qset}
+                </h3>
+                <p className="text-muted">
+                  Measured on the {calibration.qset_diff.n} gold repositories judged under both
+                  sets. {calibration.qset} removed the "official" category (now an owner flag in
+                  code) and rewrote the gate question to name what counts: uses, wraps, evaluates or
+                  reimplements Jev.
+                </p>
+                <Table
+                  head={['Metric', calibration.qset_diff.prev, calibration.qset]}
+                  rows={calibration.qset_diff.rows.map(r => [
+                    r.metric,
+                    r.prev === null ? '—' : num(r.prev, 2),
+                    r.current === null ? '—' : num(r.current, 2),
+                  ])}
+                />
+              </div>
+            ) : null}
+
+            {calibration.cost ? (
+              <div className="space-y-3">
+                <h3 className="font-medium">Cost and latency</h3>
+                <dl className="flex flex-wrap gap-x-10 gap-y-2 text-[13px]">
+                  <div>
+                    <dt className="text-muted">Calls stored</dt>
+                    <dd className="font-mono tabular-nums">{calibration.cost.calls}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted">Input tokens per call</dt>
+                    <dd className="font-mono tabular-nums">{calibration.cost.input_tokens_mean}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted">Latency p50 / p90</dt>
+                    <dd className="font-mono tabular-nums">
+                      {calibration.cost.latency_p50_ms ?? '—'} /{' '}
+                      {calibration.cost.latency_p90_ms ?? '—'} ms
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted">Estimated spend to date</dt>
+                    <dd className="font-mono tabular-nums">
+                      ${num(calibration.cost.usd_est, 2)} at ${calibration.cost.usd_per_1m_input}/1M
+                      input
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <p className="text-[14px] text-muted">
+            The written report appears once a gold set is scored.
           </p>
-          <p className="mt-2 max-w-2xl text-[14px] text-muted">
-            The written report goes here: how the gold set was labelled, where Jev and the human
-            labels disagreed and why, which threshold was chosen and what it costs, and what the
-            confusion cases say about the question set. Nothing below this line is generated from
-            data.
-          </p>
-        </div>
+        )}
       </Section>
 
       <Section title="Corrections">

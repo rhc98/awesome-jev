@@ -1,6 +1,6 @@
 {
   "qset": "v2",
-  "computed_at": "2026-09-18T03:47:40.904Z",
+  "computed_at": "2026-09-18T03:58:49.723Z",
   "n": 80,
   "gate_listed_min": 0.5,
   "gate_sweep": [
@@ -85,5 +85,222 @@
       "f1": 0.6666666666666666
     }
   ],
-  "category_agreement": 0.9242424242424242
+  "category_agreement": 0.9242424242424242,
+  "category": {
+    "n": 66,
+    "agreement": 0.9242424242424242,
+    "confusion": [
+      {
+        "human": "sdk_client",
+        "jev": "sdk_client",
+        "count": 6
+      },
+      {
+        "human": "sdk_client",
+        "jev": "research_eval",
+        "count": 1
+      },
+      {
+        "human": "agent_tooling",
+        "jev": "agent_tooling",
+        "count": 15
+      },
+      {
+        "human": "agent_tooling",
+        "jev": "research_eval",
+        "count": 1
+      },
+      {
+        "human": "application",
+        "jev": "application",
+        "count": 13
+      },
+      {
+        "human": "research_eval",
+        "jev": "research_eval",
+        "count": 9
+      },
+      {
+        "human": "game_sim",
+        "jev": "game_sim",
+        "count": 7
+      },
+      {
+        "human": "integration",
+        "jev": "integration",
+        "count": 3
+      },
+      {
+        "human": "integration",
+        "jev": "agent_tooling",
+        "count": 2
+      },
+      {
+        "human": "integration",
+        "jev": "sdk_client",
+        "count": 1
+      },
+      {
+        "human": "learning",
+        "jev": "learning",
+        "count": 7
+      },
+      {
+        "human": "other",
+        "jev": "other",
+        "count": 1
+      }
+    ],
+    "reliability": [
+      {
+        "lo": 0,
+        "hi": 0.5,
+        "n": 4,
+        "acc": 0.5
+      },
+      {
+        "lo": 0.5,
+        "hi": 0.7,
+        "n": 9,
+        "acc": 0.7777777777777778
+      },
+      {
+        "lo": 0.7,
+        "hi": 0.9,
+        "n": 4,
+        "acc": 0.75
+      },
+      {
+        "lo": 0.9,
+        "hi": 1,
+        "n": 49,
+        "acc": 1
+      }
+    ]
+  },
+  "substance": {
+    "n": 54,
+    "spearman": 0.8405183914617878,
+    "mae": 0.2705555555555555
+  },
+  "disagreements": [
+    {
+      "repo": "vercel/eve",
+      "jev": 0.03,
+      "human": true,
+      "note": "ships Jev as default eval model in experimental evaluate path; README does not say so"
+    },
+    {
+      "repo": "danieljvdm/effect-agent",
+      "jev": 0.08,
+      "human": true,
+      "note": "package.json depends on typesafe, README silent; same class as vercel/eve; rhc confirmed true. ★112"
+    },
+    {
+      "repo": "monotykamary/pi-fabric",
+      "jev": 0.1,
+      "human": true,
+      "note": "code-search hit only, README silent; rhc confirms related project. ★231"
+    },
+    {
+      "repo": "BunsDev/typesafe-ui",
+      "jev": 0.14,
+      "human": true,
+      "note": "shadcn UI kit for TypeSafe AI apps; no API calls in evidence; rhc confirmed true"
+    },
+    {
+      "repo": "cgarrot/pi-knowledge-fabric",
+      "jev": 0.16,
+      "human": true,
+      "note": "README lists \"Jev/TypeSafe (bounded judgments)\" as an optional adapter, disabled by default; jev gate 0.16 — same class as vercel-labs/ai-cli"
+    },
+    {
+      "repo": "ndolinschi/cartshield",
+      "jev": 0.26,
+      "human": true,
+      "note": "Next.js stub + SPEC.md; README one line"
+    },
+    {
+      "repo": "ASpooky/jev-kata",
+      "jev": 0.39,
+      "human": true,
+      "note": "kata scaffold with src/ and typesafe dep; README one line"
+    },
+    {
+      "repo": "ndolinschi/spendbrake",
+      "jev": 0.42,
+      "human": true,
+      "note": "stub dashboard; README 150 chars"
+    },
+    {
+      "repo": "tylorsaling-source/typesafe_use_cases",
+      "jev": 0.43,
+      "human": true,
+      "note": "no README; demos + tests import typesafe_sdk (pyproject dep)"
+    },
+    {
+      "repo": "vercel-labs/ai-cli",
+      "jev": 0.46,
+      "human": true,
+      "note": "CLI can run Jev as evaluation model; README mention is thin"
+    },
+    {
+      "repo": "AliceRoselia/Typesafe_chess_eval",
+      "jev": 0.49,
+      "human": true,
+      "note": "single-file eval of Jev at chess; jev gate 0.49"
+    }
+  ],
+  "cost": {
+    "calls": 723,
+    "repos": 579,
+    "input_tokens_total": 2280374,
+    "input_tokens_mean": 3154,
+    "output_tokens_mean": 272,
+    "latency_p50_ms": 256,
+    "latency_p90_ms": 498,
+    "usd_per_1m_input": 0.042,
+    "usd_est": 0.09577570800000001
+  },
+  "qset_diff": {
+    "prev": "v1",
+    "n": 33,
+    "rows": [
+      {
+        "metric": "mean genuine, human true",
+        "prev": 0.6863333333333334,
+        "current": 0.8513333333333332
+      },
+      {
+        "metric": "mean genuine, human false",
+        "prev": 0.03,
+        "current": 0.03333333333333333
+      },
+      {
+        "metric": "gate precision @0.5",
+        "prev": 1,
+        "current": 1
+      },
+      {
+        "metric": "gate recall @0.5",
+        "prev": 0.8333333333333334,
+        "current": 0.9333333333333333
+      },
+      {
+        "metric": "gate F1 @0.5",
+        "prev": 0.9090909090909091,
+        "current": 0.9655172413793104
+      },
+      {
+        "metric": "category agreement",
+        "prev": 0.8620689655172413,
+        "current": 0.896551724137931
+      },
+      {
+        "metric": "mean category confidence",
+        "prev": 0.8748484848484849,
+        "current": 0.8875757575757575
+      }
+    ]
+  }
 }
