@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Awesome Jev — social card source (1200×630)</title>
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+    color: #16181d; background: #ffffff; position: relative;
+  }
+  .grid {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(#e3e6ea 1.1px, transparent 1.1px);
+    background-size: 22px 22px; opacity: .55;
+  }
+  .frame { position: absolute; inset: 0; border: 14px solid #2c5fd6; box-sizing: border-box; }
+  .left { position: absolute; left: 76px; top: 118px; width: 560px; }
+  .mark { display: inline-flex; align-items: center; gap: 16px; }
+  .mark svg { width: 56px; height: 56px; }
+  .mark span { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 20px; letter-spacing: .12em; text-transform: uppercase; color: #64707d; }
+  h1 { margin: 34px 0 0; font-size: 84px; line-height: .98; letter-spacing: -.035em; font-weight: 650; }
+  p.tag { margin: 26px 0 0; font-size: 30px; line-height: 1.3; color: #16181d; }
+  p.tag b { color: #2c5fd6; font-weight: 600; }
+  p.sub { margin: 20px 0 0; font-size: 21px; line-height: 1.35; color: #64707d; max-width: 520px; }
+  .url { position: absolute; left: 76px; bottom: 60px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 22px; color: #64707d; letter-spacing: .02em; }
+  .pipe { position: absolute; right: 76px; top: 118px; width: 400px; }
+  .node { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
+  .node .box {
+    flex: 1; border: 2px solid #e3e6ea; border-radius: 12px; background: #fff;
+    padding: 16px 20px; font-size: 24px; font-weight: 600; letter-spacing: -.01em;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .node .box small { font-size: 15px; font-weight: 500; color: #64707d; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+  .node.judge .box { border-color: #2c5fd6; background: #eaf0fe; }
+  .node.judge .box small { color: #2c5fd6; }
+  .arrow { width: 400px; text-align: center; color: #c5cbd3; font-size: 22px; line-height: 1; margin: -8px 0 6px; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="frame"></div>
+
+  <div class="left">
+    <div class="mark">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#2c5fd6"/><path d="M40 14v24.5c0 7.2-4.6 11.5-11.6 11.5-5.4 0-9.4-2.6-11.4-7.2l6.2-3.2c1 2.4 2.7 3.8 5.1 3.8 2.8 0 4.5-1.7 4.5-5.1V14z" fill="#fff"/></svg>
+      <span>awesome list</span>
+    </div>
+    <h1>Awesome Jev</h1>
+    <p class="tag">Projects built on Jev,<br><b>curated by Jev.</b></p>
+    <p class="sub">Every repository is judged by TypeSafe's System One model in one typed call. Policy lives in code, and the calibration is public.</p>
+  </div>
+  <div class="url">awesome-jev.xyz</div>
+
+  <div class="pipe" aria-hidden="true">
+    <div class="node"><div class="box">Discover <small>GitHub search</small></div></div>
+    <div class="arrow">↓</div>
+    <div class="node"><div class="box">Enrich <small>README · manifests</small></div></div>
+    <div class="arrow">↓</div>
+    <div class="node judge"><div class="box">Judge <small>Jev · 1 call</small></div></div>
+    <div class="arrow">↓</div>
+    <div class="node"><div class="box">Curate <small>policy in code</small></div></div>
+    <div class="arrow">↓</div>
+    <div class="node"><div class="box">Publish <small>README · site</small></div></div>
+  </div>
+</body>
+</html>
