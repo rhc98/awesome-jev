@@ -20,22 +20,22 @@
   },
   "stats": {
     "total": 579,
-    "listed": 378,
+    "listed": 379,
     "review": 70,
-    "excluded": 131,
-    "readme_picks": 115,
+    "excluded": 130,
+    "readme_picks": 116,
     "by_category": {
+      "integration": 14,
       "research_eval": 71,
       "application": 72,
       "game_sim": 50,
       "agent_tooling": 99,
       "official": 4,
-      "integration": 13,
       "meta_list": 8,
       "sdk_client": 43,
       "learning": 18
     },
-    "overrides": 0
+    "overrides": 1
   },
   "entries": [
     {
@@ -10205,11 +10205,11 @@
       "pushed": "2026-09-17",
       "license": "Apache-2.0",
       "is_official": false,
-      "category": "agent_tooling",
+      "category": "integration",
       "pattern": "unclear",
-      "status": "excluded",
-      "status_reason": "genuine 0.03 below 0.3",
-      "readme_pick": false,
+      "status": "listed",
+      "status_reason": "override: README never mentions Jev, but the experimental evaluate path ships Jev as its default evaluation model (jev-latest in code); README-only evidence cannot see it",
+      "readme_pick": true,
       "jev": {
         "genuine": 0.03,
         "runtime_use": 0.05,
@@ -10236,7 +10236,12 @@
         "qset": "v2",
         "judged_at": "2026-09-17T17:12:36.339Z"
       },
-      "override": null,
+      "override": {
+        "status": "listed",
+        "category": "integration",
+        "reason": "README never mentions Jev, but the experimental evaluate path ships Jev as its default evaluation model (jev-latest in code); README-only evidence cannot see it",
+        "by": "rhc"
+      },
       "sources": [
         "list:hellogumbo/awesome-jev",
         "list:AnotiaWang/awesome-jev",

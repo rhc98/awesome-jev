@@ -1,0 +1,8 @@
+# Human overrides applied after the policy gate. Keys are owner/repo.
+# Fields: status (listed|review|excluded), category, reason (required), by.
+# Every entry needs a reason a reader can verify. External PRs may only touch this file.
+vercel/eve:
+  status: listed
+  category: integration
+  reason: README never mentions Jev, but the experimental evaluate path ships Jev as its default evaluation model (jev-latest in code); README-only evidence cannot see it
+  by: rhc
