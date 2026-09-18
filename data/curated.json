@@ -6,6 +6,7 @@
       "listed_min": 0.5,
       "review_min": 0.3,
       "category_conf_min": 0.5,
+      "substance_min": 0.5,
       "meta_list_min": 0.7,
       "reimpl_min": 0.7
     },
@@ -19,20 +20,20 @@
   },
   "stats": {
     "total": 579,
-    "listed": 383,
-    "review": 65,
+    "listed": 378,
+    "review": 70,
     "excluded": 131,
     "readme_picks": 115,
     "by_category": {
-      "research_eval": 74,
+      "research_eval": 71,
       "application": 72,
       "game_sim": 50,
       "agent_tooling": 99,
       "official": 4,
       "integration": 13,
       "meta_list": 8,
-      "sdk_client": 44,
-      "learning": 19
+      "sdk_client": 43,
+      "learning": 18
     },
     "overrides": 0
   },
@@ -26626,8 +26627,8 @@
       "is_official": false,
       "category": "research_eval",
       "pattern": "ranking",
-      "status": "listed",
-      "status_reason": "gate passed",
+      "status": "review",
+      "status_reason": "substance 0.26 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.51,
@@ -26916,8 +26917,8 @@
       "is_official": false,
       "category": "learning",
       "pattern": "unclear",
-      "status": "listed",
-      "status_reason": "gate passed",
+      "status": "review",
+      "status_reason": "substance 0.37 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.63,
@@ -27014,8 +27015,8 @@
       "is_official": false,
       "category": "research_eval",
       "pattern": "routing",
-      "status": "listed",
-      "status_reason": "gate passed",
+      "status": "review",
+      "status_reason": "substance 0.00 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.55,
@@ -27161,8 +27162,8 @@
       "is_official": false,
       "category": "sdk_client",
       "pattern": "infra",
-      "status": "listed",
-      "status_reason": "gate passed",
+      "status": "review",
+      "status_reason": "substance 0.05 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.62,
@@ -27210,8 +27211,8 @@
       "is_official": false,
       "category": "research_eval",
       "pattern": "unclear",
-      "status": "listed",
-      "status_reason": "gate passed",
+      "status": "review",
+      "status_reason": "substance 0.04 below 0.5",
       "readme_pick": false,
       "jev": {
         "genuine": 0.61,

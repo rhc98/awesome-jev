@@ -19,6 +19,7 @@ export const POLICY = {
     listed_min: 0.5,
     review_min: 0.3,
     category_conf_min: 0.5,
+    substance_min: 0.5, // below this a genuine repo is an empty scaffold; goldset: 4/7 such repos are noise
     meta_list_min: 0.7,
     reimpl_min: 0.7,
   },
@@ -115,7 +116,8 @@ function main() {
       reason = `meta list (is_meta_list ${a.is_meta_list.noul.toFixed(2)})`
     } else if (
       genuine >= POLICY.gate.listed_min &&
-      a.category.confidence >= POLICY.gate.category_conf_min
+      a.category.confidence >= POLICY.gate.category_conf_min &&
+      a.substance.score >= POLICY.gate.substance_min
     ) {
       status = 'listed'
       reason = 'gate passed'
@@ -124,7 +126,9 @@ function main() {
       reason =
         genuine < POLICY.gate.listed_min
           ? `genuine ${genuine.toFixed(2)} below ${POLICY.gate.listed_min}`
-          : `category confidence ${a.category.confidence.toFixed(2)} below ${POLICY.gate.category_conf_min}`
+          : a.category.confidence < POLICY.gate.category_conf_min
+            ? `category confidence ${a.category.confidence.toFixed(2)} below ${POLICY.gate.category_conf_min}`
+            : `substance ${a.substance.score.toFixed(2)} below ${POLICY.gate.substance_min}`
     } else {
       status = 'excluded'
       reason = `genuine ${genuine.toFixed(2)} below ${POLICY.gate.review_min}`
