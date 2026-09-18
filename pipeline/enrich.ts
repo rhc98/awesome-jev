@@ -3,7 +3,7 @@
  * Writes data/enriched/<owner>__<name>.json (cached; refreshed when pushed_at changes or --force).
  */
 
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Candidate } from './discover.js'
 import { gh } from './lib/github.js'
@@ -149,6 +149,9 @@ async function main() {
       console.error(`  skip ${c.repo}: ${(err as Error).message.slice(0, 120)}`)
     }
     if (!e) {
+      // The repo 404s now. Its cached file would otherwise keep feeding repos.jsonl, so the
+      // count reported below was only ever cosmetic.
+      rmSync(file, { force: true })
       gone++
       continue
     }
@@ -165,14 +168,21 @@ export type RepoMeta = Omit<Enriched, 'readme_excerpt' | 'readme_headings' | 'fi
 
 export function writeRepoMeta() {
   const dir = join(DATA, 'enriched')
-  const rows: RepoMeta[] = readdirSync(dir)
+  // candidates.jsonl is the live set. The enriched directory is a cache and is never pruned
+  // wholesale, so filtering by it is what carries a discover-side drop through to repos.jsonl,
+  // curated.json, and the README — without it a deleted repo stays linked forever.
+  const live = new Set(readJsonl<Candidate>(join(DATA, 'candidates.jsonl')).map(c => c.repo))
+  const all: RepoMeta[] = readdirSync(dir)
     .filter(f => f.endsWith('.json'))
     .map(f => readJson<Enriched>(join(dir, f), null as any))
     .filter(Boolean)
     .map(({ readme_excerpt: _r, readme_headings: _h, files_top: _f, ...meta }) => meta)
-    .sort((a, b) => a.repo.localeCompare(b.repo))
+  const rows = all.filter(m => live.has(m.repo)).sort((a, b) => a.repo.localeCompare(b.repo))
   writeJsonl(join(DATA, 'repos.jsonl'), rows)
-  console.error(`== repos.jsonl: ${rows.length} rows`)
+  const stale = all.length - rows.length
+  console.error(
+    `== repos.jsonl: ${rows.length} rows${stale ? ` (${stale} stale cached repos held back)` : ''}`,
+  )
 }
 
 main().catch(e => {
