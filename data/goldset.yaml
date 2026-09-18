@@ -2,7 +2,7 @@
 # genuine: is this repo substantively about Jev / System One (uses, wraps, evaluates, or reimplements it)?
 # category: one of sdk_client|integration|agent_tooling|application|game_sim|research_eval|learning|other (omit if unsure)
 # substance: 0 toy/empty · 1 small demo · 2 real tool · 3 production-grade (omit if unsure)
-# Labeler: rhc (1st pass by Claude from README/description evidence, reviewed by rhc). Status: DRAFT
+# Labeler: rhc (1st pass by Claude from README/description evidence, reviewed by rhc). Status: batch 1 reviewed 2026-09-18
 
 # ---- noise controls (linked from other lists or keyword matches, not Jev projects) ----
 different-ai/openwork:
@@ -37,8 +37,8 @@ typesafe-ai/skills:
 # ---- community: confident ----
 browser-use/jev-ultrafast:
   genuine: true
-  category: agent_tooling
-  note: browser agent element selection; application is defensible
+  category: application
+  note: browser agent (an agent itself, not tooling for agents); per questions.v2 definition
 jarrodwatts/jev-trader:
   genuine: true
   category: application
@@ -92,8 +92,8 @@ DevMortimer/pi-warden:
   category: agent_tooling
 awlevin/typesafe-computer-use:
   genuine: true
-  category: agent_tooling
-  note: computer-use agent; application is defensible
+  category: application
+  note: computer-use agent (an agent itself, not tooling for agents); per questions.v2 definition
 typesafeainate/dspy-typesafeify:
   genuine: true
   category: integration
@@ -123,3 +123,244 @@ vercel-labs/ai-cli:
   genuine: true
   category: integration
   note: CLI can run Jev as evaluation model; README mention is thin
+
+# ======================================================================
+# Batch 2 (2026-09-18): 49 repos, stratified from curated.json (seed 20260918)
+#   noise 17 · borderline (genuine 0.4–0.75) 12 · high-genuine by category 20
+# Labeler: 1st pass by Claude from README/manifests/code-search evidence; reviewed by rhc 2026-09-18 (REVIEW items resolved)
+# Rules applied: README-only or file-less repo → genuine false. Documented Jev integration
+#   (even optional) → true (precedent: vercel/eve). Code-search string hit with silent README → false + REVIEW.
+# ======================================================================
+
+# ---- noise: "typesafe" in name ----
+AliyuYahaya/ritza-typesafe-trial:
+  genuine: false
+  note: notes/cookbook scaffolding only; README is the repo name; nothing to list
+vinnie357/typesafe_sdk_ex:
+  genuine: false
+  note: README-only stub of an Elixir SDK; no code
+tylorsaling-source/typesafe_use_cases:
+  genuine: true
+  category: learning
+  substance: 1
+  note: no README; demos + tests import typesafe_sdk (pyproject dep)
+BunsDev/typesafe-ui:
+  genuine: true
+  category: other
+  substance: 2
+  note: shadcn UI kit for TypeSafe AI apps; no API calls in evidence; rhc confirmed true
+AliceRoselia/Typesafe_chess_eval:
+  genuine: true
+  category: research_eval
+  substance: 1
+  note: single-file eval of Jev at chess; jev gate 0.49
+
+# ---- noise: low genuine but strong signals (stars / code-search hits) ----
+hyg/blog:
+  genuine: false
+  note: personal blog; api.typesafe.ai string incidental
+braindeadpt/Trading-bot-hyperliquid_V1:
+  genuine: false
+  note: trading bot; typesafe strings in code only, 35k-char README never mentions it
+cgarrot/pi-knowledge-fabric:
+  genuine: true
+  category: agent_tooling
+  substance: 2
+  note: README lists "Jev/TypeSafe (bounded judgments)" as an optional adapter, disabled by default; jev gate 0.16 — same class as vercel-labs/ai-cli
+phareim/sfl:
+  genuine: false
+  note: personal idea-capture tool; README silent, code strings only
+danieljvdm/effect-agent:
+  genuine: true
+  category: integration
+  substance: 3
+  note: package.json depends on typesafe, README silent; same class as vercel/eve; rhc confirmed true. ★112
+monotykamary/pi-fabric:
+  genuine: true
+  category: agent_tooling
+  substance: 3
+  note: code-search hit only, README silent; rhc confirms related project. ★231
+
+# ---- noise: empty repos ----
+cardotrejos/jev-should-i-apply:
+  genuine: false
+  note: README-only (48 chars)
+ASpooky/jev-kata:
+  genuine: true
+  category: learning
+  substance: 0
+  note: kata scaffold with src/ and typesafe dep; README one line
+ndolinschi/cartshield:
+  genuine: true
+  category: application
+  substance: 1
+  note: Next.js stub + SPEC.md; README one line
+
+# ---- noise: duplicated names (forks / copies) ----
+rhc98/awesome-jev:
+  genuine: true
+  note: this list; meta handled by is_meta_list
+nickspaargaren/typesafe:
+  genuine: true
+  category: learning
+  substance: 1
+  note: single CLI example classifying a support ticket
+oxwen11/awesome-jev:
+  genuine: true
+  note: showcase list; meta handled by is_meta_list
+
+# ---- borderline: status=review ----
+shrimaanshreyash/S_RAG:
+  genuine: true
+  category: application
+  substance: 2
+  note: local RAG + HandoffProof; Jev is a documented optional "evidence governor"
+ndolinschi/spendbrake:
+  genuine: true
+  category: application
+  substance: 1
+  note: stub dashboard; README 150 chars
+genai-craft/openvons:
+  genuine: true
+  category: research_eval
+  substance: 2
+  note: open-Jev reimplementation (is_reimpl 0.84); sdk_client is the alternative
+nicolasalveshenrique-spec/medical-knowledge-triage:
+  genuine: false
+  note: no files, no README; description only
+baggiiiie/pi-stuff:
+  genuine: true
+  category: agent_tooling
+  substance: 2
+  note: collection of 5 Pi packages; one (approve-for-me) is built on TypeSafe. ★38
+opaielsheikh/typesafe-migration-guard:
+  genuine: true
+  category: agent_tooling
+  substance: 2
+  note: migration safety reviewer; application defensible (category conf 0.44)
+
+# ---- borderline: status=listed ----
+getanyapi-com/lurk:
+  genuine: true
+  category: application
+  substance: 2
+  note: Jev scores every post/comment; README leads with the product, Jev appears in env table
+mattneel/typesafe.zig:
+  genuine: true
+  category: sdk_client
+  substance: 1
+  note: no README; build.zig + src + docs present
+sgoedecke/system-one:
+  genuine: true
+  substance: 2
+  note: single-token Choice inference for open LMs using TypeSafe question types; reimpl (0.70). category unsure — sdk_client or research_eval
+rchovatiya88/cyber-breach-jev:
+  genuine: true
+  category: game_sim
+  substance: 2
+rbalch/typesafeai-review:
+  genuine: true
+  category: agent_tooling
+  substance: 2
+lahfir/claude-plugins:
+  genuine: true
+  category: agent_tooling
+  substance: 1
+  note: one plugin (delegate) asks TypeSafe which harness fits; thin README. ★18
+
+# ---- high genuine: application ----
+digitalnivuk97-ctrl/safenet:
+  genuine: true
+  category: application
+  substance: 2
+ellipsis-dev/blink:
+  genuine: true
+  category: application
+  substance: 2
+  note: codebase search CLI; "search" is listed under application in questions.v2
+cpaczek/s1s:
+  genuine: true
+  category: application
+  substance: 2
+  note: code navigation/search tool; "search" is listed under application in questions.v2
+vishesh-baghel/typesafe:
+  genuine: true
+  category: application
+  substance: 2
+  note: Upweight — HN front page reranked by Jev scores
+BunsDev/clarity-judge:
+  genuine: true
+  category: application
+  substance: 2
+
+# ---- high genuine: game_sim ----
+phyous/tsai-sc:
+  genuine: true
+  category: game_sim
+  substance: 2
+lukaske/jev-doom-agent:
+  genuine: true
+  category: game_sim
+  substance: 2
+lbotinelly/jev-little-airways:
+  genuine: true
+  category: game_sim
+  substance: 1
+RBirkeland/chess-llm:
+  genuine: true
+  category: game_sim
+  substance: 2
+  note: Jev is one of several selectable players; genuine borderline
+
+# ---- high genuine: research_eval ----
+rogeriochaves/jev-experiments:
+  genuine: true
+  category: research_eval
+  substance: 1
+vinilana/jev-eval-agent:
+  genuine: true
+  category: research_eval
+  substance: 2
+kiarina/labs:
+  genuine: true
+  category: research_eval
+  substance: 1
+  note: monorepo of labs; one lab is a Jev API/multilingual evaluation — borderline
+SashaSkind/beyondgreen:
+  genuine: true
+  category: agent_tooling
+  substance: 2
+  note: post-test investigation loop of typed agents (CI tooling); jev says research_eval 0.58
+
+# ---- high genuine: learning ----
+Bud-ro/jev-demos:
+  genuine: true
+  category: learning
+  substance: 1
+BunsDev/typesafe-ai-playground:
+  genuine: true
+  category: learning
+  substance: 2
+kavehmz/typesafe-playground:
+  genuine: true
+  category: learning
+  substance: 1
+adtyavrdhn/pydantic-jev-examples:
+  genuine: true
+  category: learning
+  substance: 1
+  note: integration is the alternative
+
+# ---- high genuine: sdk_client / integration ----
+latere-ai/typesafe-ai-go-sdk:
+  genuine: true
+  category: sdk_client
+  substance: 3
+Twister915/typesafe-ai:
+  genuine: true
+  category: sdk_client
+  substance: 3
+GenieRobot/typesafe-ai-rails:
+  genuine: true
+  category: integration
+  substance: 2
