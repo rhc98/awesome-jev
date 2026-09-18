@@ -177,8 +177,18 @@ async function main() {
       },
     })
   }
-  // keep previously seen repos that didn't show up this run
-  for (const [repo, c] of existing) if (!hits.has(repo)) rows.push(c)
+  // Missing from one run's searches is usually search flakiness, not deletion, so previously
+  // seen repos are kept. But nothing downstream ever rechecks a carried repo — enrich skips it
+  // while pushed_at is unchanged — so a deleted one would stay a candidate, and stay in the
+  // README, forever. Confirm the ones that went missing still exist. A repo dropped by mistake
+  // comes back on the next run that searches it up.
+  let vanished = 0
+  for (const [repo, c] of existing) {
+    if (hits.has(repo)) continue
+    if (await gh<RepoLite>(`/repos/${repo}`, {}, { allow404: true })) rows.push(c)
+    else vanished++
+  }
+  if (vanished) console.error(`  dropped ${vanished} carried repos that no longer exist`)
   rows.sort((a, b) => b.meta.stargazers_count - a.meta.stargazers_count)
   writeJsonl(OUT, rows)
 
