@@ -19,8 +19,8 @@
     "readme_top_per_category": 15
   },
   "stats": {
-    "total": 1425,
-    "listed": 987,
+    "total": 1423,
+    "listed": 985,
     "review": 145,
     "excluded": 293,
     "readme_picks": 124,
@@ -28,7 +28,7 @@
       "integration": 46,
       "research_eval": 162,
       "application": 201,
-      "game_sim": 110,
+      "game_sim": 108,
       "agent_tooling": 288,
       "official": 4,
       "meta_list": 31,
@@ -6797,54 +6797,6 @@
       ]
     },
     {
-      "repo": "youngsemicolon/jev-lego",
-      "name": "jev-lego",
-      "description": "A System One model builds Lego in 3D — code enumerates legal placements, Jev picks among them",
-      "site": null,
-      "language": "Python",
-      "stars": 0,
-      "created": "2026-09-18",
-      "pushed": "2026-09-18",
-      "license": null,
-      "is_official": false,
-      "category": "game_sim",
-      "pattern": "control_loop",
-      "status": "listed",
-      "status_reason": "gate passed",
-      "readme_pick": true,
-      "jev": {
-        "genuine": 0.95,
-        "runtime_use": 0.96,
-        "is_meta_list": 0.03,
-        "is_reimpl": 0.08,
-        "category_p": 0.93,
-        "category_conf": 0.91,
-        "category_probs": {
-          "research_eval": 0.03,
-          "agent_tooling": 0,
-          "game_sim": 0.93,
-          "application": 0.03,
-          "other": 0,
-          "sdk_client": 0,
-          "integration": 0,
-          "learning": 0.01
-        },
-        "pattern_conf": 0.99,
-        "substance": 1.98,
-        "docs": 2.96,
-        "novelty": 2.63,
-        "composite": 0.807,
-        "model": "jev-1.13.0",
-        "qset": "v2",
-        "judged_at": "2026-09-18T16:04:44.259Z"
-      },
-      "override": null,
-      "sources": [
-        "search:\"system one\" jev",
-        "search:jev in:name,description,readme created:2026-09-18"
-      ]
-    },
-    {
       "repo": "Gaurav-Gosain/jev-sec-bench",
       "name": "jev-sec-bench",
       "description": "Blind security benchmarks for Jev, TypeSafe's System One model: prompt injection and vulnerable code detection, built on jev-go",
@@ -11031,53 +10983,6 @@
       ]
     },
     {
-      "repo": "using76/JEV-EVAC",
-      "name": "JEV-EVAC",
-      "description": "화재 피난 판단 에이전트 — Jev 형식 타입 판독 판단층 + 소셜포스 이동, FDS-GPU 위험장 위에서 개인별 역할·구조·경로 결정",
-      "site": null,
-      "language": "Python",
-      "stars": 0,
-      "created": "2026-09-18",
-      "pushed": "2026-09-18",
-      "license": "MIT",
-      "is_official": false,
-      "category": "game_sim",
-      "pattern": "control_loop",
-      "status": "listed",
-      "status_reason": "gate passed",
-      "readme_pick": true,
-      "jev": {
-        "genuine": 0.89,
-        "runtime_use": 0.9,
-        "is_meta_list": 0.03,
-        "is_reimpl": 0.44,
-        "category_p": 0.88,
-        "category_conf": 0.86,
-        "category_probs": {
-          "agent_tooling": 0,
-          "research_eval": 0.11,
-          "game_sim": 0.88,
-          "integration": 0,
-          "learning": 0,
-          "sdk_client": 0,
-          "other": 0,
-          "application": 0.01
-        },
-        "pattern_conf": 0.99,
-        "substance": 1.95,
-        "docs": 2.98,
-        "novelty": 2.41,
-        "composite": 0.782,
-        "model": "jev-1.13.0",
-        "qset": "v2",
-        "judged_at": "2026-09-18T14:05:34.177Z"
-      },
-      "override": null,
-      "sources": [
-        "search:jev in:name,description,readme created:2026-09-18"
-      ]
-    },
-    {
       "repo": "affirmitv/ghosthands",
       "name": "ghosthands",
       "description": "Give an agent real hands and eyes: undetectable, DOM-independent GUI automation. A $4 USB-HID microcontroller for hands, a vision grounding model for eyes, any LLM for a brain.",
@@ -11581,7 +11486,7 @@
       "pattern": "control_loop",
       "status": "listed",
       "status_reason": "gate passed",
-      "readme_pick": false,
+      "readme_pick": true,
       "jev": {
         "genuine": 0.93,
         "runtime_use": 0.94,
@@ -12522,7 +12427,7 @@
       "pattern": "control_loop",
       "status": "listed",
       "status_reason": "gate passed",
-      "readme_pick": false,
+      "readme_pick": true,
       "jev": {
         "genuine": 0.88,
         "runtime_use": 0.89,
