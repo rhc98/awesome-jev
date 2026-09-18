@@ -148,12 +148,14 @@ export function VerdictCell({
   value,
   kind = 'prob',
   gate,
+  className = '',
 }: {
   label: string
   value: number
   kind?: 'prob' | 'scale' | 'category'
   /** Defaults to the policy gate for the kind; pass null for no tick. */
   gate?: number | null
+  className?: string
 }) {
   const g =
     gate === undefined
@@ -164,7 +166,7 @@ export function VerdictCell({
           : GATE
       : gate
   return (
-    <span className="flex w-full items-center gap-2 sm:w-44">
+    <span className={`flex w-full min-w-0 items-center gap-2 sm:w-44 ${className}`}>
       <span className="cap w-14 shrink-0">{label}</span>
       {kind === 'scale' ? <Segments value={value} gate={g} /> : <Track value={value} gate={g} />}
       <span className="num w-9 shrink-0 text-right font-medium font-mono text-[13px] text-fg">

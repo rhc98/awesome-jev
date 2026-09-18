@@ -44,11 +44,11 @@ export function EntryRow({ entry }: { entry: Entry }) {
       </p>
 
       {excluded ? null : (
-        <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2">
-          <VerdictCell label="genuine" value={entry.jev.genuine} />
+        <div className="mt-2 grid grid-cols-2 items-center gap-x-4 gap-y-1.5 sm:flex sm:flex-wrap sm:gap-x-5 sm:gap-y-2">
+          <VerdictCell label="genuine" value={entry.jev.genuine} className="col-span-2" />
           <VerdictCell label="cat" value={entry.jev.category_conf} kind="category" />
           <VerdictCell label="subst" value={entry.jev.substance} kind="scale" />
-          <span className="flex items-center gap-2.5">
+          <span className="col-span-2 flex items-center gap-2.5">
             <Chip tone="outline">{categoryLabel(entry.category)}</Chip>
             {entry.language ? (
               <span className="font-mono text-[12px] text-muted">{entry.language}</span>

@@ -18,7 +18,7 @@ export function SiteNav() {
       >
         Awesome Jev
       </Link>
-      <nav className="flex items-center gap-4 text-[13px] text-muted">
+      <nav className="flex items-center gap-3 text-[13px] text-muted sm:gap-4">
         {LINKS.map(link => (
           <Link key={link.href} href={link.href} className="hover:text-fg">
             {link.label}

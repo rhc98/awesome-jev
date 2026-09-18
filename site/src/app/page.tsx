@@ -14,7 +14,9 @@ export const metadata: Metadata = {
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="num font-medium font-mono text-[22px] text-fg leading-7">{value}</span>
+      <span className="num font-medium font-mono text-[20px] text-fg leading-7 sm:text-[22px]">
+        {value}
+      </span>
       <span className="cap">{label}</span>
     </div>
   )
@@ -38,7 +40,7 @@ export default function HomePage() {
           .
         </p>
 
-        <div className="mt-6 flex flex-wrap gap-x-8 gap-y-4 rounded-md bg-panel-alt px-4 py-3.5">
+        <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 rounded-md bg-panel-alt px-4 py-3.5 sm:gap-x-8">
           <Stat label="judged" value={stats.total} />
           <Stat label="listed" value={stats.listed} />
           <Stat label="review" value={stats.review} />
