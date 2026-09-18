@@ -122,8 +122,14 @@ async function main() {
 
   if (!quick) {
     console.error('== code search (slow, 10/min)')
+    // Supplementary source: repo search and seed lists carry the run on their own,
+    // so a rate-limited code query degrades discovery instead of failing it.
     for (const q of CODE_QUERIES) {
-      for (const name of await searchCodeRepos(q)) touch(name, `code:${q}`, undefined, q)
+      try {
+        for (const name of await searchCodeRepos(q)) touch(name, `code:${q}`, undefined, q)
+      } catch (e) {
+        console.error(`  code search "${q}" failed, skipping: ${(e as Error).message}`)
+      }
     }
   }
 
