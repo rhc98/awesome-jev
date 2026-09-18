@@ -1,12 +1,25 @@
 import Link from 'next/link'
+import type { CSSProperties, Ref } from 'react'
 import { VerdictCell } from '@/components/Bars'
 import { Chip } from '@/components/Chip'
 import { categoryLabel, entryHref, githubUrl, splitRepo } from '@/lib/data'
 import { compactNumber } from '@/lib/format'
 import type { Entry } from '@/lib/types'
 
-/** One repository per hairline row. Status is typographic: ink, muted + dashed, faint. */
-export function EntryRow({ entry }: { entry: Entry }) {
+/** One repository per hairline row. Status is typographic: ink, muted + dashed, faint.
+ *  ref/style/index exist so the virtualizer can measure and place the <li> directly —
+ *  a wrapper element would not be a valid child of the <ul>. */
+export function EntryRow({
+  entry,
+  ref,
+  style,
+  index,
+}: {
+  entry: Entry
+  ref?: Ref<HTMLLIElement>
+  style?: CSSProperties
+  index?: number
+}) {
   const { owner } = splitRepo(entry.repo)
   const review = entry.status === 'review'
   const excluded = entry.status === 'excluded'
@@ -15,6 +28,9 @@ export function EntryRow({ entry }: { entry: Entry }) {
 
   return (
     <li
+      ref={ref}
+      style={style}
+      data-index={index}
       className={`group border-line border-b py-3.5 transition-colors hover:border-line-strong ${
         review ? 'border-dashed' : ''
       }`}
