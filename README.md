@@ -196,4 +196,4 @@ Question set `v2`, model `jev-1.13.0`. The calibration against human labels is o
 
 ## Contributing
 
-Missing project? [Open an issue](https://github.com/rhc98/awesome-jev/issues/new?template=submit.yml) with the link; the pipeline picks it up on the next run. Think Jev got one wrong? Edit `data/overrides.yaml` with a reason and open a pull request. Do not edit this README directly; it is regenerated.
+Missing project? [Submit it](https://github.com/rhc98/awesome-jev/issues/new?template=submit.yml) with the repository URL. A bot checks the link, the next daily run judges it, and the verdict is posted back on the issue. This README carries the top 15 by composite in each category; everything else that passes the gate is on the site. Think Jev got one wrong? [Say so](https://github.com/rhc98/awesome-jev/issues/new?template=jev-got-it-wrong.yml) and a bot drafts the `data/overrides.yaml` change for a maintainer to review. Do not edit this README directly; it is regenerated.

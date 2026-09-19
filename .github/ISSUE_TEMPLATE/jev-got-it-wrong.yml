@@ -22,6 +22,20 @@ body:
         - Score looks off (substance / docs / novelty)
     validations:
       required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Correct category
+      description: Only if you picked "Wrong category" above. Ignored otherwise.
+      options:
+        - sdk_client
+        - integration
+        - agent_tooling
+        - application
+        - game_sim
+        - research_eval
+        - learning
+        - other
   - type: textarea
     id: evidence
     attributes:

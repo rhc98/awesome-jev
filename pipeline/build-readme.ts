@@ -5,43 +5,8 @@
 import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Entry } from './curate.js'
+import { REPO, SECTIONS, SITE } from './lib/sections.js'
 import { DATA, ROOT, readJson } from './lib/store.js'
-
-const SITE = 'https://awesome-jev.xyz'
-const REPO = 'rhc98/awesome-jev'
-
-const SECTIONS: { id: string; title: string; blurb: string }[] = [
-  { id: 'official', title: 'Official', blurb: 'Maintained by TypeSafe AI.' },
-  {
-    id: 'sdk_client',
-    title: 'SDKs and Clients',
-    blurb: 'Language bindings, CLIs, and thin wrappers for the API.',
-  },
-  {
-    id: 'integration',
-    title: 'Integrations',
-    blurb: 'Jev wired into frameworks, gateways, platforms, and databases.',
-  },
-  {
-    id: 'agent_tooling',
-    title: 'Agent and Developer Tooling',
-    blurb: 'Routers, guards, reviewers, skills, and MCP servers for coding agents.',
-  },
-  {
-    id: 'application',
-    title: 'Applications',
-    blurb: 'Products and features whose behavior depends on Jev decisions.',
-  },
-  { id: 'game_sim', title: 'Games, Robotics, and Simulation', blurb: 'Jev in a control loop.' },
-  {
-    id: 'research_eval',
-    title: 'Research, Evals, and Reimplementations',
-    blurb: 'Benchmarks, calibration studies, and open replicas.',
-  },
-  { id: 'learning', title: 'Learning', blurb: 'Tutorials, example galleries, and playgrounds.' },
-  { id: 'meta_list', title: 'Other Lists', blurb: 'Community-maintained lists and directories.' },
-  { id: 'other', title: 'Other', blurb: 'Genuine Jev projects that fit no category above.' },
-]
 
 const slug = (s: string) =>
   s
@@ -58,10 +23,12 @@ function describe(e: Entry): string | null {
 }
 
 function main() {
-  const cur = readJson<{ generated_at: string; stats: any; entries: Entry[] }>(
-    join(DATA, 'curated.json'),
-    null as any,
-  )
+  const cur = readJson<{
+    generated_at: string
+    policy: { readme_top_per_category: number }
+    stats: any
+    entries: Entry[]
+  }>(join(DATA, 'curated.json'), null as any)
   if (!cur) throw new Error('data/curated.json missing — run curate first')
   const picks = cur.entries.filter(e => e.readme_pick && describe(e))
   const date = cur.generated_at.slice(0, 10)
@@ -122,8 +89,10 @@ function main() {
   out.push('')
   out.push('## Contributing')
   out.push('')
+  // Only the two issue-template URLs are linked here. awesome-lint rejects a duplicate link,
+  // and the site root, the review queue, and the how-it-works page are all already linked above.
   out.push(
-    `Missing project? [Open an issue](https://github.com/${REPO}/issues/new?template=submit.yml) with the link; the pipeline picks it up on the next run. Think Jev got one wrong? Edit \`data/overrides.yaml\` with a reason and open a pull request. Do not edit this README directly; it is regenerated.`,
+    `Missing project? [Submit it](https://github.com/${REPO}/issues/new?template=submit.yml) with the repository URL. A bot checks the link, the next daily run judges it, and the verdict is posted back on the issue. This README carries the top ${cur.policy?.readme_top_per_category ?? 15} by composite in each category; everything else that passes the gate is on the site. Think Jev got one wrong? [Say so](https://github.com/${REPO}/issues/new?template=jev-got-it-wrong.yml) and a bot drafts the \`data/overrides.yaml\` change for a maintainer to review. Do not edit this README directly; it is regenerated.`,
   )
   out.push('')
   writeFileSync(join(ROOT, 'README.md'), out.join('\n'))

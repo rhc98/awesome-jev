@@ -1,0 +1,79 @@
+name: Submission verdict
+
+# Answers open submission issues once Curate has judged the repositories they seeded.
+# Idempotent by construction: it only touches open issues, every comment is paired with a
+# close, and pipeline/verdict.ts checks for its own hidden marker before saying anything.
+
+on:
+  workflow_run:
+    workflows: [Curate]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: "Single issue number (optional)"
+        type: string
+      dry_run:
+        description: "Render to the job summary, post nothing"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: submission-verdict
+  cancel-in-progress: false
+
+jobs:
+  verdict:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # workflow_run reports the sha Curate *started* from, not the data commit it just
+      # pushed. Check out the tip instead, or the verdict is read from stale curated.json.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Render
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ inputs.issue }}
+          DRY: ${{ inputs.dry_run }}
+        run: |
+          args=""
+          if [ -n "$ISSUE" ]; then args="--issue $ISSUE"; fi
+          if [ "$DRY" = "true" ]; then
+            {
+              echo '## Verdicts that would be posted'
+              echo '```markdown'
+              pnpm tsx pipeline/verdict.ts $args --dry-run
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            pnpm tsx pipeline/verdict.ts $args
+          fi
+
+      - name: Post
+        if: inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          manifest="$RUNNER_TEMP/verdict-manifest.tsv"
+          [ -s "$manifest" ] || { echo "nothing to answer"; exit 0; }
+          while IFS=$'\t' read -r number file reason; do
+            [ -n "$number" ] || continue
+            gh issue comment "$number" --body-file "$file"
+            if [ -n "$reason" ]; then gh issue close "$number" --reason "$reason"; fi
+          done < "$manifest"

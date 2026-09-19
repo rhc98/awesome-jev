@@ -12,7 +12,10 @@
     "lint": "biome check .",
     "format": "biome check --write .",
     "readme": "tsx pipeline/build-readme.ts",
-    "calibrate": "tsx pipeline/calibrate.ts"
+    "calibrate": "tsx pipeline/calibrate.ts",
+    "submissions": "tsx pipeline/submissions.ts",
+    "verdict": "tsx pipeline/verdict.ts",
+    "override-scaffold": "tsx pipeline/override-scaffold.ts"
   },
   "dependencies": {
     "@typesafe-ai/sdk": "^0.6.0",
