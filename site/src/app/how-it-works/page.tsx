@@ -54,8 +54,10 @@ function Table({ head, rows }: { head: string[]; rows: (string | number)[][] }) 
           </tr>
         </thead>
         <tbody>
+          {/* Keyed on the whole row: the confusion table has two rows starting with the same
+              category, and keying on the first cell alone dropped one of them. */}
           {rows.map(row => (
-            <tr key={String(row[0])} className="border-line border-b last:border-b-0">
+            <tr key={row.join('\u001f')} className="border-line border-b last:border-b-0">
               {row.map((cell, index) => (
                 <td
                   // biome-ignore lint/suspicious/noArrayIndexKey: column position is the identity here
