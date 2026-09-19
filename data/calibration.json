@@ -1,6 +1,6 @@
 {
   "qset": "v2",
-  "computed_at": "2026-09-18T03:58:49.723Z",
+  "computed_at": "2026-09-18T23:59:49.149Z",
   "n": 80,
   "gate_listed_min": 0.5,
   "gate_sweep": [
@@ -27,62 +27,62 @@
     {
       "thr": 0.4,
       "TP": 63,
-      "FP": 1,
+      "FP": 2,
       "FN": 7,
-      "TN": 9,
-      "prec": 0.984375,
+      "TN": 8,
+      "prec": 0.9692307692307692,
       "rec": 0.9,
-      "f1": 0.9402985074626866
+      "f1": 0.9333333333333333
     },
     {
       "thr": 0.5,
       "TP": 59,
-      "FP": 0,
+      "FP": 2,
       "FN": 11,
-      "TN": 10,
-      "prec": 1,
+      "TN": 8,
+      "prec": 0.9672131147540983,
       "rec": 0.8428571428571429,
-      "f1": 0.9147286821705426
+      "f1": 0.9007633587786259
     },
     {
       "thr": 0.6,
-      "TP": 55,
-      "FP": 0,
-      "FN": 15,
-      "TN": 10,
-      "prec": 1,
-      "rec": 0.7857142857142857,
-      "f1": 0.88
+      "TP": 56,
+      "FP": 1,
+      "FN": 14,
+      "TN": 9,
+      "prec": 0.9824561403508771,
+      "rec": 0.8,
+      "f1": 0.8818897637795275
     },
     {
       "thr": 0.7,
-      "TP": 49,
-      "FP": 0,
-      "FN": 21,
-      "TN": 10,
-      "prec": 1,
-      "rec": 0.7,
-      "f1": 0.8235294117647058
+      "TP": 53,
+      "FP": 1,
+      "FN": 17,
+      "TN": 9,
+      "prec": 0.9814814814814815,
+      "rec": 0.7571428571428571,
+      "f1": 0.8548387096774194
     },
     {
       "thr": 0.8,
-      "TP": 41,
-      "FP": 0,
-      "FN": 29,
-      "TN": 10,
-      "prec": 1,
-      "rec": 0.5857142857142857,
-      "f1": 0.7387387387387387
+      "TP": 44,
+      "FP": 1,
+      "FN": 26,
+      "TN": 9,
+      "prec": 0.9777777777777777,
+      "rec": 0.6285714285714286,
+      "f1": 0.7652173913043477
     },
     {
       "thr": 0.9,
-      "TP": 35,
-      "FP": 0,
-      "FN": 35,
-      "TN": 10,
-      "prec": 1,
-      "rec": 0.5,
-      "f1": 0.6666666666666666
+      "TP": 38,
+      "FP": 1,
+      "FN": 32,
+      "TN": 9,
+      "prec": 0.9743589743589743,
+      "rec": 0.5428571428571428,
+      "f1": 0.6972477064220183
     }
   ],
   "category_agreement": 0.9242424242424242,
@@ -93,12 +93,7 @@
       {
         "human": "sdk_client",
         "jev": "sdk_client",
-        "count": 6
-      },
-      {
-        "human": "sdk_client",
-        "jev": "research_eval",
-        "count": 1
+        "count": 7
       },
       {
         "human": "agent_tooling",
@@ -143,7 +138,12 @@
       {
         "human": "learning",
         "jev": "learning",
-        "count": 7
+        "count": 6
+      },
+      {
+        "human": "learning",
+        "jev": "game_sim",
+        "count": 1
       },
       {
         "human": "other",
@@ -155,33 +155,33 @@
       {
         "lo": 0,
         "hi": 0.5,
-        "n": 4,
-        "acc": 0.5
+        "n": 3,
+        "acc": 1
       },
       {
         "lo": 0.5,
         "hi": 0.7,
         "n": 9,
-        "acc": 0.7777777777777778
+        "acc": 0.5555555555555556
       },
       {
         "lo": 0.7,
         "hi": 0.9,
-        "n": 4,
-        "acc": 0.75
+        "n": 6,
+        "acc": 0.8333333333333334
       },
       {
         "lo": 0.9,
         "hi": 1,
-        "n": 49,
+        "n": 48,
         "acc": 1
       }
     ]
   },
   "substance": {
     "n": 54,
-    "spearman": 0.8405183914617878,
-    "mae": 0.2705555555555555
+    "spearman": 0.7591385553649704,
+    "mae": 0.2948148148148147
   },
   "disagreements": [
     {
@@ -198,13 +198,13 @@
     },
     {
       "repo": "monotykamary/pi-fabric",
-      "jev": 0.1,
+      "jev": 0.09,
       "human": true,
       "note": "code-search hit only, README silent; rhc confirms related project. ★231"
     },
     {
       "repo": "BunsDev/typesafe-ui",
-      "jev": 0.14,
+      "jev": 0.13,
       "human": true,
       "note": "shadcn UI kit for TypeSafe AI apps; no API calls in evidence; rhc confirmed true"
     },
@@ -240,7 +240,7 @@
     },
     {
       "repo": "vercel-labs/ai-cli",
-      "jev": 0.46,
+      "jev": 0.48,
       "human": true,
       "note": "CLI can run Jev as evaluation model; README mention is thin"
     },
@@ -249,18 +249,30 @@
       "jev": 0.49,
       "human": true,
       "note": "single-file eval of Jev at chess; jev gate 0.49"
+    },
+    {
+      "repo": "nicolasalveshenrique-spec/medical-knowledge-triage",
+      "jev": 0.56,
+      "human": false,
+      "note": "no files, no README; description only"
+    },
+    {
+      "repo": "vinnie357/typesafe_sdk_ex",
+      "jev": 0.95,
+      "human": false,
+      "note": "README-only stub of an Elixir SDK; no code"
     }
   ],
   "cost": {
-    "calls": 723,
-    "repos": 579,
-    "input_tokens_total": 2280374,
-    "input_tokens_mean": 3154,
+    "calls": 2497,
+    "repos": 1460,
+    "input_tokens_total": 8048698,
+    "input_tokens_mean": 3223,
     "output_tokens_mean": 272,
-    "latency_p50_ms": 256,
-    "latency_p90_ms": 498,
+    "latency_p50_ms": 215,
+    "latency_p90_ms": 366,
     "usd_per_1m_input": 0.042,
-    "usd_est": 0.09577570800000001
+    "usd_est": 0.33804531600000004
   },
   "qset_diff": {
     "prev": "v1",
@@ -269,7 +281,7 @@
       {
         "metric": "mean genuine, human true",
         "prev": 0.6863333333333334,
-        "current": 0.8513333333333332
+        "current": 0.8686666666666667
       },
       {
         "metric": "mean genuine, human false",
@@ -294,12 +306,12 @@
       {
         "metric": "category agreement",
         "prev": 0.8620689655172413,
-        "current": 0.896551724137931
+        "current": 0.9310344827586207
       },
       {
         "metric": "mean category confidence",
         "prev": 0.8748484848484849,
-        "current": 0.8875757575757575
+        "current": 0.8933333333333333
       }
     ]
   }

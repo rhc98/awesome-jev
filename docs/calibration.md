@@ -41,18 +41,34 @@ Precision, recall and F1 of `genuine ≥ threshold` against the human `genuine` 
 |---|---|---|---|---|---|---|---|
 | 0.2 | 65 | 3 | 5 | 7 | 0.96 | 0.93 | 0.94 |
 | 0.3 | 64 | 2 | 6 | 8 | 0.97 | 0.91 | 0.94 |
-| 0.4 | 63 | 1 | 7 | 9 | 0.98 | 0.90 | 0.94 |
-| **0.5** | 59 | 0 | 11 | 10 | 1.00 | 0.84 | 0.91 |
-| 0.6 | 55 | 0 | 15 | 10 | 1.00 | 0.79 | 0.88 |
-| 0.7 | 49 | 0 | 21 | 10 | 1.00 | 0.70 | 0.82 |
-| 0.8 | 41 | 0 | 29 | 10 | 1.00 | 0.59 | 0.74 |
-| 0.9 | 35 | 0 | 35 | 10 | 1.00 | 0.50 | 0.67 |
+| 0.4 | 63 | 2 | 7 | 8 | 0.97 | 0.90 | 0.93 |
+| **0.5** | 59 | 2 | 11 | 8 | 0.97 | 0.84 | 0.90 |
+| 0.6 | 56 | 1 | 14 | 9 | 0.98 | 0.80 | 0.88 |
+| 0.7 | 53 | 1 | 17 | 9 | 0.98 | 0.76 | 0.85 |
+| 0.8 | 44 | 1 | 26 | 9 | 0.98 | 0.63 | 0.77 |
+| 0.9 | 38 | 1 | 32 | 9 | 0.97 | 0.54 | 0.70 |
 
-**Chosen: `listed_min` 0.5** (down from the provisional 0.6). No human-labelled noise scores 0.5 or above, so the move costs nothing in precision and recovers four genuine repositories. The single false positive at 0.4 is `nicolasalveshenrique-spec/medical-knowledge-triage`, a repository with a description and no files, at 0.44. `review_min` stays at 0.3: everything a human called noise except that one scores below 0.3, and the review queue is where a person looks anyway.
+**`listed_min` stays 0.5**, beside the `substance ≥ 0.5` floor a listed repository must also clear. `review_min` stays 0.3.
 
-Lowering the gate admitted a repository with a zero-character README and no code (`TokenTrim/jev-routing-experiment`, genuine 0.55, substance 0.00). Of the seven gold repositories Jev scores below 0.5 on substance, four are human noise. So the policy now also requires **`substance ≥ 0.5`** to be listed; below it a genuine repository is held in review with the reason spelled out. Five repositories moved from listed to review when this landed.
+An earlier version of this report showed precision 1.00 from 0.5 upward and said the gate cost nothing. That is no longer what the numbers say, and the reason is worth more than the table. Two human-labelled noise repositories now sit above the gate: `vinnie357/typesafe_sdk_ex` at 0.95 and `nicolasalveshenrique-spec/medical-knowledge-triage` at 0.56. Precision at 0.5 is 0.97, and no threshold in the sweep reaches 1.00 any more.
 
-Two caveats on the sweep. The borderline band was over-sampled on purpose, so the miss rate here is higher than on the population. And the remaining eleven misses at 0.5 are not one kind of error; §6 sorts them.
+The gate is not where this broke. Look at what those two repositories are. `vinnie357/typesafe_sdk_ex` is one file — a 117-character README naming an Elixir SDK — with no manifest, no tests and no CI. `nicolasalveshenrique-spec/medical-knowledge-triage` has no files and no README at all; its GitHub description is the entire evidence. Both are about Jev in the sense `genuine` asks about, so 0.95 and 0.56 are defensible readings. The gold set calls them noise under its first labelling rule: **a README-only or file-less repository is not genuine, because there is nothing to list.** That rule is a statement about emptiness, and emptiness is what `substance` is for.
+
+`substance` is not catching them. It scores the one-file repository **2.30** and the empty one **1.23**, both far above the 0.5 floor. On the 0–3 scale 2 means "a real tool with several flows, some structure, and tests or examples". Nor is this confined to the noise labels: `mattneel/typesafe.zig`, a real Zig client with no README and five directory entries, is scored **2.90** against a human 1, the largest single miss in the set (§5).
+
+The two v2 runs stored for these repositories show the size of the move:
+
+| repo | 2026-09-17 | 2026-09-18 | evidence now |
+|---|---|---|---|
+| `mattneel/typesafe.zig` | genuine 0.62 · substance 0.05 | 0.96 · 2.90 | no README, 5 entries |
+| `vinnie357/typesafe_sdk_ex` | 0.38 · 0.00 | 0.95 · 2.30 | 117-char README, 1 file |
+| `TokenTrim/jev-routing-experiment` | 0.55 · 0.00 | 0.90 · 1.88 | no README, no files |
+
+The state hash changed in each case, so these are not repeat calls on identical input and the swing is not measured instability. But the repositories did not become substantial in a day, and the current evidence above is what produced the right-hand column. On evidence-poor repositories the substance score is doing something other than reading the evidence.
+
+So the conclusion is the opposite of moving the gate: **the gate is behaving, the substance floor is not, and `listed_min` should not be touched to compensate for it.** The floor was added precisely to hold empty scaffolds in review; it no longer does, and that is the finding this refresh produces. Until it is understood, the two false positives are better handled as overrides than as a threshold change.
+
+Two caveats on the sweep. The borderline band was over-sampled on purpose, so the miss rate here is higher than on the population. And the eleven misses at 0.5 are not one kind of error; §6 sorts them.
 
 ## 4. Category
 
@@ -60,13 +76,13 @@ Agreement on the 66 categorised repositories: **61 / 66 = 0.92**. Confusion, hum
 
 | human | Jev | n |
 |---|---|---|
-| sdk_client | sdk_client 6 · research_eval 1 | 7 |
+| sdk_client | sdk_client 7 | 7 |
 | agent_tooling | agent_tooling 15 · research_eval 1 | 16 |
 | application | application 13 | 13 |
 | research_eval | research_eval 9 | 9 |
 | game_sim | game_sim 7 | 7 |
 | integration | integration 3 · agent_tooling 2 · sdk_client 1 | 6 |
-| learning | learning 7 | 7 |
+| learning | learning 6 · game_sim 1 | 7 |
 | other | other 1 | 1 |
 
 `integration` is the one weak class: half of its six examples land in a neighbouring bucket. The definition ("adapter that plugs Jev into an existing framework, gateway, platform or database") overlaps with `agent_tooling` when the framework is an agent framework and with `sdk_client` when the adapter is thin. That is a question-set problem, not a model one, and is the first candidate for a v3 wording change.
@@ -75,12 +91,12 @@ Reported confidence is honest, which is what makes a threshold on it worth havin
 
 | confidence | n | accuracy |
 |---|---|---|
-| 0.0 – 0.5 | 4 | 0.50 |
-| 0.5 – 0.7 | 9 | 0.78 |
-| 0.7 – 0.9 | 4 | 0.75 |
-| 0.9 – 1.0 | 49 | **1.00** |
+| 0.0 – 0.5 | 3 | 1.00 |
+| 0.5 – 0.7 | 9 | 0.56 |
+| 0.7 – 0.9 | 6 | 0.83 |
+| 0.9 – 1.0 | 48 | **1.00** |
 
-Three quarters of judgments come back at 0.9 or above, and every one of those is right. Below 0.5 the category is a coin flip.
+Three quarters of judgments come back at 0.9 or above, and every one of those is right. Below that the curve is not monotonic and the cells are too small to read as one: three judgments under 0.5, all correct, against nine in the 0.5–0.7 band at 0.56. Read it as "0.9+ is reliable, everything below is thin evidence about thin evidence", not as a calibration curve. That is also why the threshold on it is a labelling decision and not a gate (below).
 
 **Category confidence is no longer a listing condition.** It was one — `category_conf_min` 0.5, a third clause beside `genuine` and `substance` — and that was a category error in the policy. Confidence in `category` answers *which shelf*, not *whether this belongs on any shelf*; `genuine` already answers the second question, and the two are close to independent. The gold set shows how far apart they can sit: `hyg/blog`, a personal blog matching on an incidental `api.typesafe.ai` string, is `genuine` 0.08 with category confidence 0.96. Running the reverse rule — list on either signal — drops precision from 0.97 to 0.89 on this set by admitting that blog, a trading bot and a generic agent desktop.
 
@@ -90,19 +106,31 @@ Only Jev's own choice can be uncertain. `official`, `meta_list` and the reimplem
 
 ## 5. Substance
 
-Jev's 0–3 substance score against the human one on 54 repositories: **Spearman 0.84, mean absolute error 0.27**. Good enough to order projects within a category, which is all the README's top-15 uses it for. Not good enough to read as a grade: the largest misses are repositories with no README at all (`mattneel/typesafe.zig`, a real Zig client scored 0.05) where Jev has nothing to work with.
+Jev's 0–3 substance score against the human one on 54 repositories: **Spearman 0.76, mean absolute error 0.29**, down from 0.84 / 0.27 in the previous run. Good enough to order projects within a category, which is all the README's top-15 uses it for. Not good enough to read as a grade.
 
-## 6. Five failure cases
+The three largest misses all run the same way — Jev scores higher than the human — but they are not one kind of error:
 
-Every gate disagreement at 0.5 is a miss, never a false alarm. Sorted by cause:
+| repo | human | Jev | evidence |
+|---|---|---|---|
+| `mattneel/typesafe.zig` | 1 | 2.90 | no README; `build.zig`, `src`, `docs`; no tests, no CI |
+| `jkudish/jev-mcp` | 1 | 2.44 | 6.5k README, 10 entries, tests **and** CI |
+| `jarrodwatts/jev-trader` | 1 | 1.80 | 5.6k README, 17 entries, no tests |
+
+Only the first is the failure §3 traced through the gate: four of the five fields the question names (`readme_excerpt`, `files_top`, `has_tests`, `has_ci`, `readme_headings`) are empty or false, and the score drifts up rather than down. A v3 candidate is to make absent evidence score explicitly instead of leaving it to be inferred.
+
+The other two are a disagreement about the rubric, not about the evidence. A repository with a 6.5k README, tests and CI meets the wording of level 2 — "a real tool with several flows, some structure, and tests or examples" — and Jev says 2.44; the human read both as demos and said 1. That is a case for tightening the level descriptions, or for accepting that substance carries about half a point of legitimate spread. It is also a reminder that 54 labels is a small n for a four-level scale.
+
+## 6. Failure cases
+
+Thirteen repositories disagree with the gate at 0.5: eleven misses and, for the first time, two false alarms. The two false alarms are the near-empty repositories dissected in §3 and they are a substance failure, not a gate one. The eleven misses sort by cause:
 
 ### 6.1 Evidence gap: the README is silent — `vercel/eve`
 
-Jev 0.03, human genuine. A 5,000-star agent framework whose README never mentions Jev; the integration lives in an experimental evaluate path and shows up only in code search (`jev-latest`). Jev is judging the README and the README says nothing. This is not a model error and no README-based question can fix it. It is handled the only honest way: a human override in `data/overrides.yaml` with the reason written out, counted and displayed as a disagreement. `danieljvdm/effect-agent` (0.08, TypeSafe in `package.json`) and `monotykamary/pi-fabric` (0.10, code-search hit only) are the same class and are the next override candidates once someone confirms the integration is documented anywhere a reader could find it.
+Jev 0.03, human genuine. A 5,000-star agent framework whose README never mentions Jev; the integration lives in an experimental evaluate path and shows up only in code search (`jev-latest`). Jev is judging the README and the README says nothing. This is not a model error and no README-based question can fix it. It is handled the only honest way: a human override in `data/overrides.yaml` with the reason written out, counted and displayed as a disagreement. `danieljvdm/effect-agent` (0.08, TypeSafe in `package.json`) and `monotykamary/pi-fabric` (0.09, code-search hit only) are the same class and are the next override candidates once someone confirms the integration is documented anywhere a reader could find it.
 
 ### 6.2 Evidence gap: the README is thin — `vercel-labs/ai-cli`
 
-Jev 0.46, human genuine. The README mentions that the CLI can run Jev as an evaluation model, once, in passing. Jev lands just under the gate. `cgarrot/pi-knowledge-fabric` (0.16, Jev listed as an optional adapter that is disabled by default) is the stronger version of the same thing. These are correct readings of weak evidence; the fix, if any, is feeding Jev a longer README excerpt or the manifest dependency list with more weight, which is a v3 experiment.
+Jev 0.48, human genuine. The README mentions that the CLI can run Jev as an evaluation model, once, in passing. Jev lands just under the gate. `cgarrot/pi-knowledge-fabric` (0.16, Jev listed as an optional adapter that is disabled by default) is the stronger version of the same thing. These are correct readings of weak evidence; the fix, if any, is feeding Jev a longer README excerpt or the manifest dependency list with more weight, which is a v3 experiment.
 
 ### 6.3 Model error — `AliceRoselia/Typesafe_chess_eval`
 
@@ -114,7 +142,7 @@ Human `sdk_client`, Jev `research_eval` under both v1 and v2. The research_eval 
 
 ### 6.5 Question design, fixed in v2 — `AbdelStark/awesome-typesafe`
 
-v1 genuine 0.16, v2 0.74. The v1 gate question asked whether the repository "is a Jev project"; a curated list of Jev projects is not one, and Jev said so. v2 rewrote the question to name what counts (uses, wraps, evaluates, reimplements, or collects) and the list scores as genuine, with `is_meta_list` routing it to its own section. The same v1 flaw split `typesafe-ai/typesafe-sdk-python` between an `official` category and `sdk_client` at confidence 0.45; v2 removed `official` from the choice and made it an owner flag in code.
+v1 genuine 0.16, v2 0.75. The v1 gate question asked whether the repository "is a Jev project"; a curated list of Jev projects is not one, and Jev said so. v2 rewrote the question to name what counts (uses, wraps, evaluates, reimplements, or collects) and the list scores as genuine, with `is_meta_list` routing it to its own section. The same v1 flaw split `typesafe-ai/typesafe-sdk-python` between an `official` category and `sdk_client` at confidence 0.49; v2 removed `official` from the choice and made it an owner flag in code.
 
 No judgment failure traced to a code error. One pipeline bug did surface in the same period: the cron job committed `curated.json` without the `repos.jsonl` it was derived from, so CI could not reproduce it. Fixed by committing both.
 
@@ -124,29 +152,29 @@ Measured on the 33 gold repositories judged under both sets:
 
 | metric | v1 | v2 |
 |---|---|---|
-| mean genuine, human true | 0.69 | 0.85 |
+| mean genuine, human true | 0.69 | 0.87 |
 | mean genuine, human false | 0.03 | 0.03 |
 | gate precision @0.5 | 1.00 | 1.00 |
 | gate recall @0.5 | 0.83 | 0.93 |
 | gate F1 @0.5 | 0.91 | 0.97 |
-| category agreement | 0.86 | 0.90 |
+| category agreement | 0.86 | 0.93 |
 | mean category confidence | 0.87 | 0.89 |
 
-What changed between the sets: the gate question names the qualifying relationships instead of asking for "a Jev project"; `official` left the category list and became a code-side flag; criteria text for each category was tightened to the wording in `questions.v2.ts`. Noise did not move. Genuine repositories moved up by 0.16 on average, which is the whole gain.
+What changed between the sets: the gate question names the qualifying relationships instead of asking for "a Jev project"; `official` left the category list and became a code-side flag; criteria text for each category was tightened to the wording in `questions.v2.ts`. Noise did not move on these 33. Genuine repositories moved up by 0.18 on average, which is the whole gain. Note the scope: this table covers only the repositories judged under both question sets, which is why precision reads 1.00 here while the full-set sweep in §3 does not — neither of the two false positives is in the shared 33.
 
 ## 8. Cost and latency
 
-From the 723 v2 calls stored in `data/judgments.jsonl`:
+From the 2,497 v2 calls stored in `data/judgments.jsonl`, covering 1,460 repositories:
 
 | | |
 |---|---|
-| input tokens per call | 3,154 (mean) |
-| output tokens per call | ~270 |
-| latency p50 / p90 | 256 ms / 498 ms |
-| total input tokens | 2.28 M |
-| estimated spend | ≈ $0.10 at $0.042 per 1M input tokens (output is free) |
+| input tokens per call | 3,223 (mean) |
+| output tokens per call | ~272 |
+| latency p50 / p90 | 215 ms / 366 ms |
+| total input tokens | 8.05 M |
+| estimated spend | ≈ $0.34 at $0.042 per 1M input tokens (output is free) |
 
-The price is a secondary-source figure. At this rate the daily cron, which judges only new or changed repositories, costs well under a cent a day.
+The price is a secondary-source figure. A call costs about $0.00014, so the daily cron — which judges only new or changed repositories — costs well under a cent a day; the $0.34 above is the whole v2 history, re-judges included.
 
 ## 9. What this does not show
 
