@@ -7,29 +7,25 @@
  * `gh issue comment --body-file`, so no rendered text is ever passed as a shell argument. An
  * empty close reason means leave the issue open.
  */
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { parse as parseYaml } from 'yaml'
 import type { Candidate } from './discover.js'
 import type { Curated, MarkerKind } from './lib/comment.js'
 import { marker, renderDropped, renderStalled, renderVerdict } from './lib/comment.js'
 import { gh, type RepoLite } from './lib/github.js'
 import { REPO } from './lib/sections.js'
 import { arg, DATA, readJson, readJsonl } from './lib/store.js'
-
-type Submission = { issue: number; by: string; at: string }
+import { readSubmissions } from './lib/submission-file.js'
 
 /** How long a seeded repo may sit unjudged before the issue gets a progress note. */
 const STALL_DAYS = 3
 
-type Action = { issue: number; body: string; close: '' | 'completed' | 'not_planned' }
-
-function readSubmissions(): Record<string, Submission> {
-  const f = join(DATA, 'submissions.yaml')
-  if (!existsSync(f)) return {}
-  return (parseYaml(readFileSync(f, 'utf8')) ?? {}) as Record<string, Submission>
-}
+/**
+ * `close` is spelled for `gh issue close --reason`, which takes `not planned` with a space.
+ * The REST API spells it `not_planned`; the CLI rejects that. Empty means leave the issue open.
+ */
+type Action = { issue: number; body: string; close: '' | 'completed' | 'not planned' }
 
 async function openSubmissionIssues(): Promise<number[]> {
   const items = await gh<{ number: number; pull_request?: unknown }[]>(`/repos/${REPO}/issues`, {
@@ -91,7 +87,7 @@ async function plan(only?: number): Promise<Action[]> {
       actions.push({
         issue,
         body: renderVerdict(entry, cur),
-        close: entry.status === 'excluded' ? 'not_planned' : 'completed',
+        close: entry.status === 'excluded' ? 'not planned' : 'completed',
       })
       continue
     }
@@ -110,7 +106,7 @@ async function plan(only?: number): Promise<Action[]> {
     actions.push({
       issue,
       body: renderDropped(sub.repo, await dropReason(sub.repo)),
-      close: 'not_planned',
+      close: 'not planned',
     })
   }
   return actions

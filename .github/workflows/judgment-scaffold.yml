@@ -9,8 +9,10 @@ name: Judgment scaffold
 # needed nor allowed here.
 
 on:
+  # No `labeled`, for the same reason as submission-intake.yml: the form labels the issue at
+  # creation, so it would double-fire against `opened`. Use the dispatch input to re-scaffold.
   issues:
-    types: [opened, labeled]
+    types: [opened]
   workflow_dispatch:
     inputs:
       issue:

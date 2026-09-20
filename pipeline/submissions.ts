@@ -7,10 +7,9 @@
  * issue is echoed back in a comment either — every reason below is a fixed string, and the
  * only user-derived value that ever appears is a repo slug the GitHub API confirmed.
  */
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { parseDocument } from 'yaml'
 import type { Curated } from './lib/comment.js'
 import {
   renderDuplicate,
@@ -22,8 +21,7 @@ import {
 import { gh, type RepoLite } from './lib/github.js'
 import { REPO } from './lib/sections.js'
 import { arg, DATA, readJson } from './lib/store.js'
-
-type Submission = { issue: number; by: string; at: string }
+import { readSubmissions, type Submission, writeSubmission } from './lib/submission-file.js'
 
 /** GitHub paths that look like `owner/repo` but are not repositories. */
 const RESERVED = new Set([
@@ -64,7 +62,12 @@ function extractUrl(body: string): string | null {
 
 type Outcome = {
   comment: string
-  close?: 'completed' | 'not_planned'
+  /**
+   * Spelled for `gh issue close --reason`, which takes `not planned` with a space. The REST
+   * API spells the same value `not_planned`; passing that to the CLI is rejected and fails
+   * the step after the comment has already posted.
+   */
+  close?: 'completed' | 'not planned'
   label?: 'invalid' | 'duplicate'
   write?: { repo: string; entry: Submission }
 }
@@ -84,7 +87,7 @@ async function decide(issue: number): Promise<Outcome> {
       comment: renderRejected(
         `no GitHub repository URL was found in this issue. Open a [submission](${SUBMIT_TEMPLATE}) with the repository link in the URL field.`,
       ),
-      close: 'not_planned',
+      close: 'not planned',
       label: 'invalid',
     }
 
@@ -94,7 +97,7 @@ async function decide(issue: number): Promise<Outcome> {
       comment: renderRejected(
         'that link is not a repository URL. It should look like `https://github.com/owner/repo`, with no path after the repository name.',
       ),
-      close: 'not_planned',
+      close: 'not planned',
       label: 'invalid',
     }
 
@@ -108,7 +111,7 @@ async function decide(issue: number): Promise<Outcome> {
   if (!meta)
     return {
       comment: renderRejected('that repository does not exist, or it is private.'),
-      close: 'not_planned',
+      close: 'not planned',
       label: 'invalid',
     }
 
@@ -116,19 +119,19 @@ async function decide(issue: number): Promise<Outcome> {
   if (repo.toLowerCase() === REPO.toLowerCase())
     return {
       comment: renderRejected('that is this list itself.'),
-      close: 'not_planned',
+      close: 'not planned',
       label: 'invalid',
     }
   if (meta.fork)
     return {
       comment: renderRejected('forks are out of scope. Submit the upstream repository instead.'),
-      close: 'not_planned',
+      close: 'not planned',
       label: 'invalid',
     }
   if (meta.archived)
     return {
       comment: renderRejected('archived repositories are out of scope.'),
-      close: 'not_planned',
+      close: 'not planned',
       label: 'invalid',
     }
 
@@ -154,30 +157,6 @@ async function decide(issue: number): Promise<Outcome> {
       entry: { issue, by: raw.user.login, at: new Date().toISOString().slice(0, 10) },
     },
   }
-}
-
-function readSubmissions(): Record<string, Submission> {
-  const f = join(DATA, 'submissions.yaml')
-  if (!existsSync(f)) return {}
-  return (parseDocument(readFileSync(f, 'utf8')).toJS() ?? {}) as Record<string, Submission>
-}
-
-/**
- * Edit through the yaml Document so the file's header comment survives, and drop any entry
- * this issue owned before — an edited issue that corrects a typo'd URL moves its entry
- * rather than leaving the old repo queued forever.
- */
-function writeSubmission(repo: string, entry: Submission): boolean {
-  const f = join(DATA, 'submissions.yaml')
-  const doc = parseDocument(existsSync(f) ? readFileSync(f, 'utf8') : '{}\n')
-  const before = String(doc)
-  for (const [k, v] of Object.entries((doc.toJS() ?? {}) as Record<string, Submission>))
-    if (v?.issue === entry.issue && k !== repo) doc.delete(k)
-  doc.set(repo, entry)
-  const after = String(doc)
-  if (after === before) return false
-  writeFileSync(f, after)
-  return true
 }
 
 async function main() {
