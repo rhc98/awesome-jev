@@ -1,11 +1,13 @@
-import { CATEGORY_GATE, GATE, SUBSTANCE_GATE } from '@/lib/data'
+import { CATEGORY_UNCERTAIN_BELOW, GATE, SUBSTANCE_GATE } from '@/lib/data'
 import { num } from '@/lib/format'
 
 const clamp = (v: number) => Math.max(0, Math.min(1, v))
 
 /**
  * The signature: a hairline track filled to a probability, with an ink tick at the policy
- * gate. Gates come from curated.policy (see lib/data); pass `gate={null}` for no tick.
+ * threshold. Thresholds come from curated.policy (see lib/data); pass `gate={null}` for no
+ * tick. On a category bar the tick is not a listing gate — it marks where Jev's choice stops
+ * being confident enough to state plainly.
  */
 function Track({
   value,
@@ -162,7 +164,7 @@ export function VerdictCell({
       ? kind === 'scale'
         ? SUBSTANCE_GATE
         : kind === 'category'
-          ? CATEGORY_GATE
+          ? CATEGORY_UNCERTAIN_BELOW
           : GATE
       : gate
   return (

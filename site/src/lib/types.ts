@@ -30,6 +30,7 @@ export interface Entry {
   license: string | null
   is_official: boolean
   category: string
+  category_uncertain: boolean
   pattern: string
   status: Status
   status_reason: string

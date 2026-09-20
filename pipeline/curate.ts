@@ -18,11 +18,16 @@ export const POLICY = {
   gate: {
     listed_min: 0.5,
     review_min: 0.3,
-    category_conf_min: 0.5,
     substance_min: 0.5, // below this a genuine repo is an empty scaffold; goldset: 4/7 such repos are noise
     meta_list_min: 0.7,
     reimpl_min: 0.7,
   },
+  // Not a gate. Category confidence answers "which shelf", not "does this belong on any
+  // shelf" — genuine already answers that, and the two are independent: goldset noise like
+  // a personal blog scores category_conf 0.96. Holding a repo Jev is 0.90 sure about
+  // because the shelf is unclear buys nothing, so below this the category is labelled
+  // uncertain and the entry is listed anyway.
+  category_uncertain_below: 0.5,
   weights: { substance: 0.45, docs: 0.25, novelty: 0.3 },
   star_bonus_max: 0.1, // log1p(stars)/log1p(1000) * this
   readme_top_per_category: 15,
@@ -47,6 +52,7 @@ export type Entry = {
   license: string | null
   is_official: boolean
   category: string
+  category_uncertain: boolean
   pattern: string
   status: 'listed' | 'review' | 'excluded'
   status_reason: string
@@ -99,6 +105,7 @@ function main() {
     const genuine = a.genuine.noul
     const isMeta = a.is_meta_list.noul >= POLICY.gate.meta_list_min
     const isReimpl = a.is_reimpl.noul >= POLICY.gate.reimpl_min
+    const assignedByCode = e.is_official_org || isReimpl || isMeta
     let category: string = e.is_official_org
       ? 'official'
       : isReimpl
@@ -116,7 +123,6 @@ function main() {
       reason = `meta list (is_meta_list ${a.is_meta_list.noul.toFixed(2)})`
     } else if (
       genuine >= POLICY.gate.listed_min &&
-      a.category.confidence >= POLICY.gate.category_conf_min &&
       a.substance.score >= POLICY.gate.substance_min
     ) {
       status = 'listed'
@@ -126,9 +132,7 @@ function main() {
       reason =
         genuine < POLICY.gate.listed_min
           ? `genuine ${genuine.toFixed(2)} below ${POLICY.gate.listed_min}`
-          : a.category.confidence < POLICY.gate.category_conf_min
-            ? `category confidence ${a.category.confidence.toFixed(2)} below ${POLICY.gate.category_conf_min}`
-            : `substance ${a.substance.score.toFixed(2)} below ${POLICY.gate.substance_min}`
+          : `substance ${a.substance.score.toFixed(2)} below ${POLICY.gate.substance_min}`
     } else {
       status = 'excluded'
       reason = `genuine ${genuine.toFixed(2)} below ${POLICY.gate.review_min}`
@@ -139,6 +143,10 @@ function main() {
       reason = `override: ${ov.reason}`
     }
     if (ov?.category) category = ov.category
+    // Only Jev's own choice can be uncertain: the other paths are assigned by code or by a
+    // human override, and neither carries the model's category confidence.
+    const categoryUncertain =
+      !assignedByCode && !ov?.category && a.category.confidence < POLICY.category_uncertain_below
 
     entries.push({
       repo,
@@ -152,6 +160,7 @@ function main() {
       license: e.license,
       is_official: e.is_official_org,
       category,
+      category_uncertain: categoryUncertain,
       pattern: a.pattern.choice,
       status,
       status_reason: reason,

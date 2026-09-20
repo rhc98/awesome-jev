@@ -54,8 +54,10 @@ function Table({ head, rows }: { head: string[]; rows: (string | number)[][] }) 
           </tr>
         </thead>
         <tbody>
+          {/* Keyed on the whole row: the confusion table has two rows starting with the same
+              category, and keying on the first cell alone dropped one of them. */}
           {rows.map(row => (
-            <tr key={String(row[0])} className="border-line border-b last:border-b-0">
+            <tr key={row.join('\u001f')} className="border-line border-b last:border-b-0">
               {row.map((cell, index) => (
                 <td
                   // biome-ignore lint/suspicious/noArrayIndexKey: column position is the identity here
@@ -196,8 +198,8 @@ export default function HowItWorksPage() {
                 dependency is genuine and empty.
               </p>
               <p>
-                The full write-up, including five failure cases and what each one says about the
-                evidence or the question set, is in{' '}
+                The full write-up, including every gate disagreement and what each one says about
+                the evidence or the question set, is in{' '}
                 <a
                   href={`${REPO_URL}/blob/main/docs/calibration.md`}
                   target="_blank"
@@ -213,12 +215,25 @@ export default function HowItWorksPage() {
             <div className="space-y-3">
               <h3 className="font-medium">Threshold</h3>
               <p>
-                The listed gate is genuine ≥ {num(calibration.gate_listed_min ?? 0.6, 1)}. On the
-                gold set no repository a human called noise scores 0.5 or higher, so lowering the
-                gate from 0.6 buys recall without paying precision; 0.4 admits the first noise. A
-                separate substance floor keeps empty scaffolds in review even when they pass the
-                gate. The sweep above over-states the miss rate: repositories near the gate were
-                deliberately over-sampled.
+                The listed gate is genuine ≥ {num(calibration.gate_listed_min ?? 0.6, 1)} with a
+                substance floor beside it, and those two are the whole gate. The sweep above
+                over-states the miss rate: repositories near the gate were deliberately
+                over-sampled.
+              </p>
+              <p>
+                Two repositories a human called noise now score above the gate — one whose entire
+                content is a 117-character README, one with no files at all — so precision on the
+                gold set reads 0.97 where an earlier run read 1.00. Both are empty repositories that
+                the substance floor exists to hold back and no longer does; that is a problem with
+                the substance score, not with the gate, and moving the gate to cover for it would
+                cost real projects. The working through is in docs/calibration.md §3.
+              </p>
+              <p>
+                Category confidence used to be a third condition and is not one any more: it answers
+                which shelf an entry belongs on, not whether it belongs on any, and the two are
+                independent enough that a personal blog with no Jev in it scores 0.96. A repository
+                Jev is sure about is now listed with its category marked uncertain rather than held
+                back.
               </p>
             </div>
 
@@ -239,8 +254,10 @@ export default function HowItWorksPage() {
                     .map(c => [categoryLabel(c.human), categoryLabel(c.jev), c.count])}
                 />
                 <p className="text-muted">
-                  Reported confidence tracks accuracy, which is what makes the category-confidence
-                  threshold in the policy meaningful:
+                  Three quarters of judgments come back at 0.9 or above and every one of those is
+                  right; below that the cells are small and the curve is not monotonic. The
+                  uncertainty threshold reads this: under it the category is shown with a question
+                  mark instead of stated plainly. Listing is unaffected either way.
                 </p>
                 <Table
                   head={['Confidence', 'n', 'Accuracy']}

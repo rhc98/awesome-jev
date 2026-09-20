@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import type { CSSProperties, Ref } from 'react'
 import { VerdictCell } from '@/components/Bars'
-import { Chip } from '@/components/Chip'
-import { categoryLabel, entryHref, githubUrl, splitRepo } from '@/lib/data'
+import { CategoryChip } from '@/components/Chip'
+import { entryHref, githubUrl, splitRepo } from '@/lib/data'
 import { compactNumber } from '@/lib/format'
 import type { Entry } from '@/lib/types'
 
@@ -65,7 +65,7 @@ export function EntryRow({
           <VerdictCell label="cat" value={entry.jev.category_conf} kind="category" />
           <VerdictCell label="subst" value={entry.jev.substance} kind="scale" />
           <span className="col-span-2 flex items-center gap-2.5">
-            <Chip tone="outline">{categoryLabel(entry.category)}</Chip>
+            <CategoryChip category={entry.category} uncertain={entry.category_uncertain} />
             {entry.language ? (
               <span className="font-mono text-[12px] text-muted">{entry.language}</span>
             ) : null}
