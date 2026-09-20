@@ -26,14 +26,18 @@ permissions:
   contents: read # the push below authenticates as BOT_TOKEN via the checkout credential
   issues: write # comments post as github-actions[bot], never as the maintainer
 
+# Keyed per issue, not per workflow. A repository-wide group does not queue runs: GitHub keeps
+# at most one pending run per group and cancels any earlier pending one, so two submissions
+# arriving while a third is in flight would leave the middle one silently unanswered. Per issue,
+# runs for different issues never contend, and the only thing that coalesces is repeat events
+# for the same issue, which is what we want. Concurrent pushes are handled in the commit step.
 concurrency:
-  group: submission-intake
+  group: submission-intake-${{ github.event.issue.number || inputs.issue }}
   cancel-in-progress: false
 
 jobs:
   intake:
-    # Blank issues are still allowed, so the title prefix backs up the label. The `labeled`
-    # trigger plus this guard is also how a maintainer retro-ingests an older issue.
+    # Blank issues are still allowed, so the title prefix backs up the label.
     if: >-
       github.event_name == 'workflow_dispatch' ||
       contains(github.event.issue.labels.*.name, 'submission') ||
@@ -64,20 +68,35 @@ jobs:
         run: pnpm tsx pipeline/submissions.ts --issue "$ISSUE"
 
       # Only data/submissions.yaml is staged here, and curate.yml's commit step stages an
-      # explicit list that excludes it — so the two jobs can never conflict on a rebase.
+      # explicit list that excludes it — so intake and the daily run never contend.
+      #
+      # Two intake runs can, though, and both append to the end of the same YAML map, which is
+      # the one place a rebase would conflict. So a rejected push does not replay the commit:
+      # it resets to the new tip and re-runs the script, which reads the current file and sets
+      # its one key again. That also self-corrects if the repo was judged in the meantime —
+      # the rerun decides there is nothing to seed, and the later GITHUB_OUTPUT wins, so the
+      # reply below becomes the verdict rather than a stale "queued".
       - name: Commit
         if: steps.intake.outputs.changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "awesome-jev-bot"
           git config user.email "bot@awesome-jev.xyz"
-          git add data/submissions.yaml
-          git commit -m "submit: queue ${{ steps.intake.outputs.repo }} (#${{ env.ISSUE }})"
           for attempt in 1 2 3; do
+            git add data/submissions.yaml
+            if git diff --cached --quiet; then
+              echo "nothing left to commit"
+              exit 0
+            fi
+            git commit -m "submit: queue ${{ steps.intake.outputs.repo }} (#${{ env.ISSUE }})"
             if git push; then
               exit 0
             fi
-            echo "push rejected (attempt $attempt), replaying onto origin/main"
-            git pull --rebase origin main
+            echo "push rejected (attempt $attempt), rebuilding on the new tip"
+            git fetch origin main
+            git reset --hard origin/main
+            pnpm tsx pipeline/submissions.ts --issue "$ISSUE"
           done
           echo "::error::Could not push after 3 attempts"
           exit 1
