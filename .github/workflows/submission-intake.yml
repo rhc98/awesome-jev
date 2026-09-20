@@ -38,10 +38,16 @@ concurrency:
 jobs:
   intake:
     # Blank issues are still allowed, so the title prefix backs up the label.
+    #
+    # Only open issues. `edited` is here so a submitter who fixes a typo'd URL gets
+    # reprocessed, but it fires on every edit, including edits to an issue that was already
+    # answered and closed — which would post the same verdict a second time. Reprocessing a
+    # closed issue on purpose is what reopening it, or the dispatch below, is for.
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      contains(github.event.issue.labels.*.name, 'submission') ||
-      startsWith(github.event.issue.title, 'Submit: ')
+      (github.event.issue.state == 'open' &&
+       (contains(github.event.issue.labels.*.name, 'submission') ||
+        startsWith(github.event.issue.title, 'Submit: ')))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
