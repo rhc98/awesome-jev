@@ -4,11 +4,10 @@
  * seed awesome lists (parsed for github.com links), issue submissions (data/submissions.yaml).
  * Writes data/candidates.jsonl (merged by repo).
  */
-import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { parse as parseYaml } from 'yaml'
 import { gh, type RepoLite, searchCodeRepos, searchRepos } from './lib/github.js'
 import { arg, DATA, readJsonl, writeJsonl } from './lib/store.js'
+import { readSubmissions } from './lib/submission-file.js'
 
 const OUT = join(DATA, 'candidates.jsonl')
 const SINCE = '2026-09-10'
@@ -45,24 +44,16 @@ const SEED_LISTS = [
 
 const CODE_QUERIES = ['"@typesafe-ai/sdk"', '"typesafe_sdk"', '"api.typesafe.ai"', '"jev-latest"']
 
-/** One repo submitted through the issue form. */
-type Submission = { issue: number; by: string; at: string }
-
 /**
- * Repos submitted through the issue form. Search only finds a repo that says "jev" in its
- * name, description, or topics (strictMatch below), which is exactly the case the submit
- * form exists to cover — so these are seeded unconditionally and Jev's gate still decides
- * whether they are listed.
+ * Repos submitted through the issue form come from data/submissions.yaml. Search only finds a
+ * repo that says "jev" in its name, description, or topics (strictMatch below), which is
+ * exactly the case the submit form exists to cover — so these are seeded unconditionally and
+ * Jev's gate still decides whether they are listed.
  *
- * Read-only here. .github/workflows/submission-intake.yml is the only writer, which is why
- * an incoming submission can never race the daily run, and why curate.yml's commit step
+ * Read-only here. .github/workflows/submission-intake.yml is the only writer, which is why an
+ * incoming submission can never race the daily run, and why curate.yml's commit step
  * deliberately leaves this file out of its `git add` list.
  */
-function readSubmissions(): Record<string, Submission> {
-  const f = join(DATA, 'submissions.yaml')
-  if (!existsSync(f)) return {}
-  return (parseYaml(readFileSync(f, 'utf8')) ?? {}) as Record<string, Submission>
-}
 
 const STATIC_QUERIES = [
   'jev typesafe',

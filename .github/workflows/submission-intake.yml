@@ -9,8 +9,12 @@ name: Submission intake
 # itself over the API.
 
 on:
+  # No `labeled`. The issue form applies the label as the issue is created, so `labeled` fires
+  # alongside `opened` for every submission; the concurrency group then cancels one of the pair
+  # at random and the survivor does the same work twice over. Retro-ingesting an issue the
+  # trigger missed is what the workflow_dispatch input below is for.
   issues:
-    types: [opened, edited, reopened, labeled]
+    types: [opened, edited, reopened]
   workflow_dispatch:
     inputs:
       issue:
