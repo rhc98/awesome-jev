@@ -24,8 +24,10 @@ permissions:
   contents: read # the branch push authenticates as BOT_TOKEN via the checkout credential
   issues: write
 
+# Per issue, for the reason spelled out in submission-intake.yml: a repository-wide group
+# cancels earlier pending runs rather than queueing them, so a burst loses the middle ones.
 concurrency:
-  group: judgment-scaffold
+  group: judgment-scaffold-${{ github.event.issue.number || inputs.issue }}
   cancel-in-progress: false
 
 jobs:

@@ -22,6 +22,9 @@ permissions:
   contents: read
   issues: write
 
+# Repository-wide on purpose, unlike the two issue-keyed workflows. This run sweeps every open
+# submission issue, so a coalesced duplicate loses nothing: whichever run survives does the
+# same full pass.
 concurrency:
   group: submission-verdict
   cancel-in-progress: false
