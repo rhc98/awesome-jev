@@ -76,3 +76,7 @@ pnpm enrich --limit 30
 pnpm judge --limit 30
 pnpm curate && pnpm readme && pnpm inspect
 ```
+
+`data/enriched/` is a gitignored cache that a clone does not carry, so the first local run starts cold. `--limit` and `--repos` keep that cheap, and a run scoped either way deliberately leaves `data/repos.jsonl` alone: it is rebuilt from the whole cache, which after a partial run holds only the repositories that run fetched. Rebuilding from that would shrink `repos.jsonl`, and `data/curated.json` and `README.md` with it.
+
+So a scoped run is for looking at one repository, not for regenerating the committed data. `pnpm curate && pnpm readme` after one reproduces what is already committed, because curate reads `data/repos.jsonl` and `data/judgments.jsonl` rather than the cache. If a local run does leave those files changed, `git checkout -- data README.md` puts them back; only the daily run is meant to update them.
