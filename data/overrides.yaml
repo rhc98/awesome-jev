@@ -4,5 +4,18 @@
 vercel/eve:
   status: listed
   category: integration
-  reason: README never mentions Jev, but the experimental evaluate path ships Jev as its default evaluation model (jev-latest in code); README-only evidence cannot see it
+  reason: README never mentions Jev, but the experimental evaluate path ships Jev
+    as its default evaluation model (jev-latest in code); README-only evidence
+    cannot see it
   by: rhc
+valentynkit/jev-plays-pokemon-red:
+  category: application
+  reason: 'MAINTAINER TEST of the override scaffold, not a real dispute. The
+    resulting draft PR will be closed unmerged. Payload for the sanitizer
+    follows, since this field is the only user text that reaches a committed
+    file: reason: "unterminated key: [unclosed - a: b tab separated segments
+    $(whoami) `id` ; echo pwned ...and a very long tail to exercise the length
+    cap:
+    AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA…
+    (see #27)'
+  by: rhc98

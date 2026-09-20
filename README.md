@@ -102,10 +102,10 @@ Products and features whose behavior depends on Jev decisions.
 - [jev-mobile](https://github.com/Friedjof/jev-mobile) - Fast structured Android control loops with TypeSafe Jev and Mobile MCP.
 - [mappity](https://github.com/kortexa-ai/mappity) - Ask the map anything. Every place answers with a probability. OpenStreetMap + Mapillary + TypeSafe Jev + Cactus Needle.
 - [snifftest](https://github.com/DanRWilloughby/snifftest) - A prose linter that sniffs out AI writing tells. Zero dependencies, countable rules plus one judgment model.
+- [jev-plays-pokemon-red](https://github.com/valentynkit/jev-plays-pokemon-red) - Pokemon Red on PyBoy: code owns the route and the arithmetic, Jev picks at branches in about 100 ms, calibration measured instead of assumed.
 - [jev-skip](https://github.com/valentynkit/jev-skip) - YouTube sponsor skipper that reads the captions and decides at watch time: a probability heatmap on the seek bar, no crowd database.
 - [jev-relay](https://github.com/rnjsxodyd90/jev-relay) - A typed Jev decision gate, local-voice interpreter workbench, and reproducible Jev vs Qwen research.
 - [openagents](https://github.com/OpenAgentsInc/openagents) - Monorepo & docs.
-- [jev-search](https://github.com/jh1373/jev-search) - Search your Obsidian vault locally and offline with no API key, then rerank the top results with Jev only after you approve exactly what gets sent. Experimental preview.
 
 ## Games, Robotics, and Simulation
 
@@ -116,7 +116,6 @@ Jev in a control loop.
 - [jev-nethack](https://github.com/integrate-your-mind/jev-nethack) - Jev x NetHack: bounded runner, research code, and completed recording releases.
 - [jev-tetris](https://github.com/Tsagaanbayr1/jev-tetris) - Real-time Tetris versus Jev, a TypeSafe decision model — spins, garbage, B2B chains, and decisions prefetched a piece ahead.
 - [jev-sonar](https://github.com/meetr1912/jev-sonar) - TypeSafe Jev plays Battleship: one ~100-question typed fan-out per turn returns a calibrated hit-probability heatmap that is also the move policy.
-- [jev-plays-pokemon-red](https://github.com/valentynkit/jev-plays-pokemon-red) - Pokemon Red on PyBoy: code owns the route and the arithmetic, Jev picks at branches in about 100 ms, calibration measured instead of assumed.
 - [robots-world](https://github.com/DanMcInerney/robots-world) - A modular multi-robot control testbed with swappable physics, sensors, AI controllers, and impaired swarm communication.
 - [spire-jev](https://github.com/enderzcx/spire-jev) - Slay the Spire 2 agent controller: planner models, Jev fast decisions, and verified multi-card turn execution.
 - [last-exit](https://github.com/0x963D/last-exit) - A cyberpunk border encounter powered by TypeSafe Jev. Bluff the guard. Inspect the receipts.
@@ -124,6 +123,7 @@ Jev in a control loop.
 - [typesafe-mario](https://github.com/fhshaik/typesafe-mario) - A TypeSafe/Jev agent that plays Super Mario Bros. from structured emulator state.
 - [typesafe-chess](https://github.com/TholeG/typesafe-chess) - Chess where both players are TypeSafe's Jev model: every move is a typed Choice decision.
 - [jev-mine-sweeping](https://github.com/sxinyuhoo/jev-mine-sweeping) - 用 TypeSafe Jev（System One）驱动扫雷自动通关：HTML 扫雷页每走一步实时问模型，并把它的选项、概率、代码已证明的事实全部可视化。Play Minesweeper with TypeSafe Jev (System One): an HTML game that asks the model every move and visualises its options, probabilities and the facts the code proved.
+- [jevball](https://github.com/atarikcaliskan/jevball) - 22 Jev models, one ball: a 3D football match where every player is its own Jev (TypeSafe AI System One) decision. Watch, or take over the number 9.
 
 ## Research, Evals, and Reimplementations
 

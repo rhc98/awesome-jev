@@ -27,8 +27,8 @@
     "by_category": {
       "integration": 92,
       "research_eval": 255,
-      "application": 372,
-      "game_sim": 171,
+      "application": 373,
+      "game_sim": 170,
       "agent_tooling": 457,
       "official": 4,
       "meta_list": 47,
@@ -36,7 +36,7 @@
       "learning": 91,
       "other": 3
     },
-    "overrides": 1
+    "overrides": 2
   },
   "entries": [
     {
@@ -7953,7 +7953,7 @@
       "pushed": "2026-09-19",
       "license": "MIT",
       "is_official": false,
-      "category": "game_sim",
+      "category": "application",
       "category_uncertain": false,
       "pattern": "control_loop",
       "status": "listed",
@@ -7985,7 +7985,11 @@
         "qset": "v2",
         "judged_at": "2026-09-19T10:54:26.246Z"
       },
-      "override": null,
+      "override": {
+        "category": "application",
+        "reason": "MAINTAINER TEST of the override scaffold, not a real dispute. The resulting draft PR will be closed unmerged. Payload for the sanitizer follows, since this field is the only user text that reaches a committed file: reason: \"unterminated key: [unclosed - a: b tab separated segments $(whoami) `id` ; echo pwned ...and a very long tail to exercise the length cap: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA… (see #27)",
+        "by": "rhc98"
+      },
       "sources": [
         "search:jev in:name,description,readme created:2026-09-18"
       ]
@@ -10049,7 +10053,7 @@
       "pattern": "ranking",
       "status": "listed",
       "status_reason": "gate passed",
-      "readme_pick": true,
+      "readme_pick": false,
       "jev": {
         "genuine": 0.92,
         "runtime_use": 0.68,
@@ -15215,7 +15219,7 @@
       "pattern": "control_loop",
       "status": "listed",
       "status_reason": "gate passed",
-      "readme_pick": false,
+      "readme_pick": true,
       "jev": {
         "genuine": 0.93,
         "runtime_use": 0.9,
