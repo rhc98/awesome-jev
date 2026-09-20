@@ -1,5 +1,5 @@
 name: Submit a project
-description: Add a Jev / TypeSafe project. The pipeline judges it on the next run.
+description: Add a Jev / TypeSafe project. A bot checks the URL now; the next daily run judges it and posts the verdict here.
 title: "Submit: "
 labels: [submission]
 body:

@@ -1,0 +1,90 @@
+name: Submission intake
+
+# Validates a submitted repository URL and seeds it into data/submissions.yaml, which
+# pipeline/discover.ts reads as a discovery source. The verdict comes back later, from
+# submission-verdict.yml, once the daily Curate run has judged it.
+#
+# The issue body never reaches this file. Only the issue number crosses into the job, through
+# env rather than a ${{ }} expansion inside run:, and pipeline/submissions.ts fetches the body
+# itself over the API.
+
+on:
+  issues:
+    types: [opened, edited, reopened, labeled]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: "Issue number to (re)ingest"
+        required: true
+        type: string
+
+permissions:
+  contents: read # the push below authenticates as BOT_TOKEN via the checkout credential
+  issues: write # comments post as github-actions[bot], never as the maintainer
+
+concurrency:
+  group: submission-intake
+  cancel-in-progress: false
+
+jobs:
+  intake:
+    # Blank issues are still allowed, so the title prefix backs up the label. The `labeled`
+    # trigger plus this guard is also how a maintainer retro-ingests an older issue.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.issue.labels.*.name, 'submission') ||
+      startsWith(github.event.issue.title, 'Submit: ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ISSUE: ${{ github.event.issue.number || inputs.issue }}
+    steps:
+      # BOT_TOKEN is the credential that can push to main: the branch ruleset requires a pull
+      # request and admits only the admin bypass. Same arrangement as curate.yml.
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Validate and seed
+        id: intake
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm tsx pipeline/submissions.ts --issue "$ISSUE"
+
+      # Only data/submissions.yaml is staged here, and curate.yml's commit step stages an
+      # explicit list that excludes it — so the two jobs can never conflict on a rebase.
+      - name: Commit
+        if: steps.intake.outputs.changed == 'true'
+        run: |
+          git config user.name "awesome-jev-bot"
+          git config user.email "bot@awesome-jev.xyz"
+          git add data/submissions.yaml
+          git commit -m "submit: queue ${{ steps.intake.outputs.repo }} (#${{ env.ISSUE }})"
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "push rejected (attempt $attempt), replaying onto origin/main"
+            git pull --rebase origin main
+          done
+          echo "::error::Could not push after 3 attempts"
+          exit 1
+
+      - name: Reply
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMENT: ${{ steps.intake.outputs.comment }}
+          LABEL: ${{ steps.intake.outputs.label }}
+          CLOSE: ${{ steps.intake.outputs.close }}
+        run: |
+          gh issue comment "$ISSUE" --body-file "$COMMENT"
+          if [ -n "$LABEL" ]; then gh issue edit "$ISSUE" --add-label "$LABEL"; fi
+          if [ -n "$CLOSE" ]; then gh issue close "$ISSUE" --reason "$CLOSE"; fi

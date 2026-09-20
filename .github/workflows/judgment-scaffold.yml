@@ -1,0 +1,93 @@
+name: Judgment scaffold
+
+# Turns a "Jev got it wrong" issue into a DRAFT pull request against data/overrides.yaml.
+# It never merges and never marks the pull request ready: the entry it writes is a stranger's
+# claim, `reason` is user text that ends up on the calibration page, and stats.overrides is a
+# published measure of Jev-versus-human disagreement. A maintainer decides.
+#
+# issues events already run in the base-repo context, so pull_request_target is neither
+# needed nor allowed here.
+
+on:
+  issues:
+    types: [opened, labeled]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: "Issue number to (re)scaffold"
+        required: true
+        type: string
+
+permissions:
+  contents: read # the branch push authenticates as BOT_TOKEN via the checkout credential
+  issues: write
+
+concurrency:
+  group: judgment-scaffold
+  cancel-in-progress: false
+
+jobs:
+  scaffold:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.issue.labels.*.name, 'judgment') ||
+      startsWith(github.event.issue.title, 'Judgment: ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ISSUE: ${{ github.event.issue.number || inputs.issue }}
+    steps:
+      # BOT_TOKEN, not GITHUB_TOKEN: a pull request opened with GITHUB_TOKEN triggers no other
+      # workflows, so checks.yml would never run and the required status check would sit
+      # pending forever. The cost is that the pull request is authored by the maintainer
+      # account, which is why its body opens by saying it was generated and unverified.
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Scaffold
+        id: scaffold
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm tsx pipeline/override-scaffold.ts --issue "$ISSUE"
+
+      # checks.yml re-runs curate and readme and fails on any drift, so the pull request has
+      # to carry the regenerated files. This needs no API key: curate.ts reads only committed
+      # metadata, which is exactly why it was built that way.
+      - name: Regenerate
+        if: steps.scaffold.outputs.action == 'pr'
+        run: pnpm curate && pnpm readme
+
+      - name: Open draft pull request
+        if: steps.scaffold.outputs.action == 'pr'
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.scaffold.outputs.branch }}
+          TITLE: ${{ steps.scaffold.outputs.title }}
+          BODY: ${{ steps.scaffold.outputs.body }}
+        run: |
+          git config user.name "awesome-jev-bot"
+          git config user.email "bot@awesome-jev.xyz"
+          git checkout -b "$BRANCH"
+          git add data/overrides.yaml data/curated.json README.md
+          git commit -m "$TITLE"
+          git push --force-with-lease -u origin "$BRANCH"
+          if [ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            echo "pull request already open for $BRANCH, updated in place"
+            exit 0
+          fi
+          gh pr create --draft --base main --head "$BRANCH" --title "$TITLE" --body-file "$BODY"
+
+      - name: Reply
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMENT: ${{ steps.scaffold.outputs.comment }}
+        run: gh issue comment "$ISSUE" --body-file "$COMMENT"

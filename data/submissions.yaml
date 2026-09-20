@@ -1,0 +1,14 @@
+# Repositories submitted through the issue form. pipeline/discover.ts seeds these as
+# candidates (source `issue:<n>`) so a submission reaches enrich and judge even when GitHub
+# search never surfaces it. Keys are the canonical owner/repo as the GitHub API reports it.
+#
+# Seeding only grants candidacy. Jev still judges the repo and the policy gate in
+# pipeline/curate.ts still decides whether it is listed.
+#
+# Single writer: .github/workflows/submission-intake.yml. discover.ts only reads this file,
+# and nothing prunes it — removing an entry would drop the repo from data/candidates.jsonl
+# and therefore from the site. Hand edits are the supported way to seed a repo directly.
+kylemclaren/jevql:
+  issue: 11
+  by: kylemclaren
+  at: 2026-09-18

@@ -160,6 +160,18 @@ async function main() {
     if (done % 25 === 0) console.error(`  enriched ${done}`)
   }
   console.error(`== enriched ${done}, cached ${skipped}, gone ${gone}`)
+  // writeRepoMeta rebuilds repos.jsonl from the whole enriched directory, so it is only
+  // correct after a run that considered every candidate. A scoped run leaves the rest of the
+  // cache untouched — and on a fresh clone the cache holds just the handful of repos this run
+  // fetched, which would rewrite the committed repos.jsonl down to those rows and take
+  // curated.json and the README with it. Scoped runs are for inspecting one repo; the next
+  // unscoped run regenerates the metadata.
+  if (only || Number.isFinite(limit)) {
+    console.error(
+      '== repos.jsonl left alone (scoped run); use an unscoped `pnpm enrich` to rebuild it',
+    )
+    return
+  }
   writeRepoMeta()
 }
 

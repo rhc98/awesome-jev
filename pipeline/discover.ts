@@ -1,9 +1,12 @@
 /**
  * Discover candidate repos.
  * Sources: repo search (windowed by created date), code search (SDK usage evidence),
- * seed awesome lists (parsed for github.com links). Writes data/candidates.jsonl (merged by repo).
+ * seed awesome lists (parsed for github.com links), issue submissions (data/submissions.yaml).
+ * Writes data/candidates.jsonl (merged by repo).
  */
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { parse as parseYaml } from 'yaml'
 import { gh, type RepoLite, searchCodeRepos, searchRepos } from './lib/github.js'
 import { arg, DATA, readJsonl, writeJsonl } from './lib/store.js'
 
@@ -12,7 +15,7 @@ const SINCE = '2026-09-10'
 
 export type Candidate = {
   repo: string
-  sources: string[] // "search:<q>" | "code:<q>" | "list:<owner/repo>"
+  sources: string[] // "search:<q>" | "code:<q>" | "list:<owner/repo>" | "issue:<n>"
   evidence: string[] // code-search hits (strong signal)
   first_seen: string
   last_seen: string
@@ -41,6 +44,25 @@ const SEED_LISTS = [
 ]
 
 const CODE_QUERIES = ['"@typesafe-ai/sdk"', '"typesafe_sdk"', '"api.typesafe.ai"', '"jev-latest"']
+
+/** One repo submitted through the issue form. */
+type Submission = { issue: number; by: string; at: string }
+
+/**
+ * Repos submitted through the issue form. Search only finds a repo that says "jev" in its
+ * name, description, or topics (strictMatch below), which is exactly the case the submit
+ * form exists to cover — so these are seeded unconditionally and Jev's gate still decides
+ * whether they are listed.
+ *
+ * Read-only here. .github/workflows/submission-intake.yml is the only writer, which is why
+ * an incoming submission can never race the daily run, and why curate.yml's commit step
+ * deliberately leaves this file out of its `git add` list.
+ */
+function readSubmissions(): Record<string, Submission> {
+  const f = join(DATA, 'submissions.yaml')
+  if (!existsSync(f)) return {}
+  return (parseYaml(readFileSync(f, 'utf8')) ?? {}) as Record<string, Submission>
+}
 
 const STATIC_QUERIES = [
   'jev typesafe',
@@ -136,13 +158,32 @@ async function main() {
   console.error('== seed lists')
   for (const [repo, sources] of await seedFromLists()) for (const s of sources) touch(repo, s)
 
-  // Fill missing meta (code-search / list hits) with a repo GET.
+  // Outside the --quick guard on purpose: this is the cheap source (no API calls of its own,
+  // see below), and it is the one a maintainer needs to exercise when testing a submission
+  // with `gh workflow run curate.yml -f quick=true`.
+  //
+  // Keep this block last. enrich skips a repo only while its `sources` array stringifies
+  // identically, and the merge below puts the previous array first — so appending a source
+  // perturbs one repo once, while reordering these blocks would re-enrich all of them.
+  console.error('== submissions')
+  const submissions = readSubmissions()
+  for (const [repo, s] of Object.entries(submissions)) touch(repo, `issue:${s.issue}`)
+  console.error(`  ${Object.keys(submissions).length} submitted repos`)
+
+  // Fill missing meta (code-search / list / submission hits) with a repo GET. A submitted
+  // repo that no search found lands here, spending the GET the carried-candidate loop below
+  // would otherwise have spent on it — so a submission costs no extra API calls after the
+  // first run.
   console.error('== fetching meta for hits without search meta')
   let fetched = 0
   for (const [repo, h] of hits) {
     if (h.meta) continue
     const r = await gh<RepoLite>(`/repos/${repo}`, {}, { allow404: true })
     if (!r) {
+      // Say so for submissions: this is the silent drop the verdict workflow has to explain
+      // back to whoever opened the issue.
+      if ([...h.sources].some(s => s.startsWith('issue:')))
+        console.error(`  submitted repo ${repo} is gone or private, dropping`)
       hits.delete(repo)
       continue
     }
@@ -194,8 +235,9 @@ async function main() {
 
   const withCode = rows.filter(r => r.evidence.length).length
   const fromLists = rows.filter(r => r.sources.some(s => s.startsWith('list:'))).length
+  const fromIssues = rows.filter(r => r.sources.some(s => s.startsWith('issue:'))).length
   console.error(
-    `== ${rows.length} candidates (code evidence: ${withCode}, from lists: ${fromLists}, new this run: ${rows.length - existing.size})`,
+    `== ${rows.length} candidates (code evidence: ${withCode}, from lists: ${fromLists}, from issues: ${fromIssues}, new this run: ${rows.length - existing.size})`,
   )
 }
 
