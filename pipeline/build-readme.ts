@@ -17,6 +17,16 @@ const slug = (s: string) =>
 function describe(e: Entry): string | null {
   let d = (e.description ?? '').replace(/\s+/g, ' ').trim()
   if (!d) return null
+  // awesome-lint no-repeat-item-in-description: a description must not start with
+  // the item name. Repo authors often write "<name>: ..." or "<name> v1 - ...";
+  // strip that prefix (case-insensitive, optional version token, :, en/em dash, or
+  // a spaced " -" so hyphenated words like "Sub2API-CRS2" stay intact).
+  const name = e.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  d = d.replace(
+    new RegExp(`^${name}\\b(?:\\s+v\\d+(?:\\.\\d+)*)?(?:\\s*[:\\u2013\\u2014]|\\s+-)\\s*`, 'i'),
+    '',
+  )
+  if (!d) return null
   d = d.charAt(0).toUpperCase() + d.slice(1)
   if (!/[.!?]$/.test(d)) d += '.'
   return d
