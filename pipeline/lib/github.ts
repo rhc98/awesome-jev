@@ -35,15 +35,34 @@ export async function gh<T = any>(
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v))
   let attempt = 0
   let rateWaits = 0
+  let lastErr = ''
+  // Network-level failures (socket closed, reset, DNS, a body cut off mid-read) throw
+  // instead of returning a status. They are as transient as a 5xx and share its budget:
+  // one dropped connection must not abort a whole curate run.
+  const networkRetry = async (e: unknown) => {
+    const err = e as Error & { cause?: { code?: string; message?: string } }
+    lastErr = [err.message, err.cause?.code ?? err.cause?.message].filter(Boolean).join(': ')
+    attempt++
+    console.error(
+      `  network error on ${url.pathname} (${lastErr}), retrying (${attempt}/${MAX_ATTEMPTS})`,
+    )
+    await sleep(2000 * attempt)
+  }
   while (attempt < MAX_ATTEMPTS && rateWaits < MAX_RATE_WAITS) {
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${TOKEN}`,
-        Accept: opts.accept ?? 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-        'User-Agent': 'awesome-jev-pipeline',
-      },
-    })
+    let res: Response
+    try {
+      res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          Accept: opts.accept ?? 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+          'User-Agent': 'awesome-jev-pipeline',
+        },
+      })
+    } catch (e) {
+      await networkRetry(e)
+      continue
+    }
     if ((res.status === 404 || res.status === 409 || res.status === 422) && opts.allow404)
       return null
     if (res.status === 403 || res.status === 429) {
@@ -62,14 +81,19 @@ export async function gh<T = any>(
       continue
     }
     if (res.status >= 500) {
+      lastErr = `HTTP ${res.status}`
       await sleep(2000 * (attempt + 1))
       attempt++
       continue
     }
     if (!res.ok) throw new Error(`GitHub ${res.status} ${url}: ${(await res.text()).slice(0, 200)}`)
-    return (opts.raw ? await res.text() : await res.json()) as T
+    try {
+      return (opts.raw ? await res.text() : await res.json()) as T
+    } catch (e) {
+      await networkRetry(e)
+    }
   }
-  throw new Error(`GitHub retries exhausted: ${url}`)
+  throw new Error(`GitHub retries exhausted: ${url}${lastErr ? ` (last: ${lastErr})` : ''}`)
 }
 
 export type RepoLite = {
