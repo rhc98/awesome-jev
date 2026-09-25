@@ -10,7 +10,13 @@ import { arg, DATA, readJsonl, writeJsonl } from './lib/store.js'
 import { readSubmissions } from './lib/submission-file.js'
 
 const OUT = join(DATA, 'candidates.jsonl')
+// Jev's launch: no per-day window ever reaches back past this.
 const SINCE = '2026-09-10'
+// Per-day windows cover only the last WINDOW_DAYS days (today included). Re-searching every
+// day since launch grew by one ~45s query per day, heading for the job timeout. A repo only
+// has to be found once — candidates.jsonl carries it after that — so the window only needs to
+// cover search-index lag and a few missed daily runs. `--days all` backfills from SINCE.
+const WINDOW_DAYS = 7
 
 export type Candidate = {
   repo: string
@@ -65,10 +71,16 @@ const STATIC_QUERIES = [
   'topic:system-one',
 ]
 
-function days(from: string): string[] {
+function days(windowDays: number | 'all'): string[] {
   const out: string[] = []
-  const d = new Date(from + 'T00:00:00Z')
   const end = new Date()
+  const floor = new Date(SINCE + 'T00:00:00Z')
+  const d = new Date(`${end.toISOString().slice(0, 10)}T00:00:00Z`)
+  if (windowDays === 'all') d.setTime(floor.getTime())
+  else {
+    d.setUTCDate(d.getUTCDate() - (windowDays - 1))
+    if (d < floor) d.setTime(floor.getTime())
+  }
   while (d <= end) {
     out.push(d.toISOString().slice(0, 10))
     d.setUTCDate(d.getUTCDate() + 1)
@@ -110,6 +122,10 @@ async function seedFromLists(): Promise<Map<string, string[]>> {
 
 async function main() {
   const quick = arg('quick') === 'true' // skip code search + per-day windows
+  const daysArg = arg('days') ?? String(WINDOW_DAYS)
+  const windowDays = daysArg === 'all' ? 'all' : Number(daysArg)
+  if (windowDays !== 'all' && !(Number.isInteger(windowDays) && windowDays >= 1))
+    throw new Error(`--days must be a positive integer or "all", got "${daysArg}"`)
   const now = new Date().toISOString()
   const existing = new Map(readJsonl<Candidate>(OUT).map(c => [c.repo, c]))
   const hits = new Map<string, { sources: Set<string>; evidence: Set<string>; meta?: RepoLite }>()
@@ -121,10 +137,15 @@ async function main() {
     if (meta) h.meta = meta
   }
 
-  console.error('== repo search')
+  console.error(
+    `== repo search (per-day window: ${windowDays === 'all' ? `since ${SINCE}` : `${windowDays} days`})`,
+  )
   const queries = quick
     ? STATIC_QUERIES.slice(0, 3)
-    : [...STATIC_QUERIES, ...days(SINCE).map(d => `jev in:name,description,readme created:${d}`)]
+    : [
+        ...STATIC_QUERIES,
+        ...days(windowDays).map(d => `jev in:name,description,readme created:${d}`),
+      ]
   for (const q of queries) {
     for (const r of await searchRepos(q, quick ? 2 : 10)) {
       if (r.fork || r.archived) continue

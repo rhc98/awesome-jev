@@ -9,6 +9,10 @@ on:
         description: "Skip code search and per-day windows"
         type: boolean
         default: false
+      days:
+        description: "Per-day search window in days, or 'all' to backfill since launch (default 7)"
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -81,7 +85,8 @@ jobs:
       - name: Discover
         env:
           GITHUB_TOKEN: ${{ steps.tok.outputs.pick == 'bot' && secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
-        run: pnpm discover ${{ inputs.quick && '--quick' || '' }}
+          DAYS: ${{ inputs.days }}
+        run: pnpm discover ${{ inputs.quick && '--quick' || '' }} ${DAYS:+--days "$DAYS"}
 
       - name: Enrich
         env:
