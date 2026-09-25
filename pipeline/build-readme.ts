@@ -29,6 +29,15 @@ function describe(e: Entry): string | null {
   if (!d) return null
   d = d.charAt(0).toUpperCase() + d.slice(1)
   if (!/[.!?]$/.test(d)) d += '.'
+  // remark-lint:awesome-spell-check: the canonical spelling is "PostgreSQL".
+  // Replace only the standalone word: "PostgreSQL" itself never matches, and
+  // variants like "Postgres+" or "PostgresXL" are left untouched.
+  d = d.replace(/\bPostgres(?![\w+])/g, 'PostgreSQL')
+  // Escape Markdown special characters so free-text repo descriptions are not
+  // parsed as Markdown (remark-lint:no-undefined-references on "[...]", plus
+  // emphasis, images, and autolinks). Parentheses are excluded. This runs after
+  // the trailing-period check above so that check sees the unescaped text.
+  d = d.replace(/[\\*_<>![\]]/g, '\\$&')
   return d
 }
 
