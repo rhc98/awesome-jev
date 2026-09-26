@@ -72,6 +72,7 @@ pnpm install
 export TYPESAFE_API_KEY=...    # console.typesafe.ai
 gh auth login                  # or export GITHUB_TOKEN=...
 pnpm discover --quick          # fast: skips code search and per-day windows
+pnpm discover --days all       # full: per-day windows since launch instead of the last 7 days
 pnpm enrich --limit 30
 pnpm judge --limit 30
 pnpm curate && pnpm readme && pnpm inspect
