@@ -1,12 +1,14 @@
 /**
  * Enrich candidates with README excerpt, file listing, manifest evidence.
- * Writes data/enriched/<owner>__<name>.json (cached; refreshed when pushed_at changes or --force).
+ * Writes data/enriched/<owner>__<name>.json (cached; refreshed when pushed_at changes, on the
+ * repo's refresh day from lib/refresh.ts, or with --force).
  */
 
 import { existsSync, readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Candidate } from './discover.js'
 import { gh } from './lib/github.js'
+import { refreshPolicy } from './lib/refresh.js'
 import { arg, DATA, readJson, readJsonl, repoKey, writeJson, writeJsonl } from './lib/store.js'
 
 const README_CHARS = 5000
@@ -127,8 +129,10 @@ async function main() {
   const only = arg('repos')?.split(',')
   let cands = readJsonl<Candidate>(join(DATA, 'candidates.jsonl'))
   if (only) cands = cands.filter(c => only.includes(c.repo))
+  const refresh = refreshPolicy()
   let done = 0,
     skipped = 0,
+    deferred = 0,
     gone = 0
   for (const c of cands) {
     if (done >= limit) break
@@ -139,6 +143,16 @@ async function main() {
       const sameSources = JSON.stringify(prev?.sources ?? []) === JSON.stringify(c.sources)
       if (prev && prev.pushed_at === c.meta.pushed_at && sameEvidence && sameSources) {
         skipped++
+        continue
+      }
+      // Changed, but not this repo's refresh day: the refetch waits for it. Evidence and
+      // sources come from discover rather than the API, so they are brought up to date now at
+      // no cost. pushed_at stays behind on purpose, which is what re-enriches it on its day.
+      // A scoped --repos run is an explicit ask and always refetches.
+      if (prev && !only && !refresh.due(c.repo, c.sources, c.meta)) {
+        if (!sameEvidence || !sameSources)
+          writeJson(file, { ...prev, code_evidence: c.evidence, sources: c.sources })
+        deferred++
         continue
       }
     }
@@ -159,7 +173,10 @@ async function main() {
     done++
     if (done % 25 === 0) console.error(`  enriched ${done}`)
   }
-  console.error(`== enriched ${done}, cached ${skipped}, gone ${gone}`)
+  console.error(
+    `== enriched ${done}, cached ${skipped}, deferred ${deferred} not due, gone ${gone}` +
+      ` (refresh tiers due/changed: ${refresh.summary()})`,
+  )
   // writeRepoMeta rebuilds repos.jsonl from the whole enriched directory, so it is only
   // correct after a run that considered every candidate. A scoped run leaves the rest of the
   // cache untouched — and on a fresh clone the cache holds just the handful of repos this run
