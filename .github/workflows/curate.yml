@@ -28,7 +28,9 @@ jobs:
     # sleep for hours blocks the next day's scheduled run (concurrency group above
     # does not cancel in progress) and burns runner time invisibly. The enriched
     # cache makes a timeout a checkpoint rather than a loss: the next run resumes.
-    timeout-minutes: 90
+    # 150 rather than 90: the bot PAT's 5,000 core calls reset hourly, and a run that
+    # spills into a third window must be able to finish it.
+    timeout-minutes: 150
     steps:
       # BOT_TOKEN (fine-grained PAT, contents:write) lets the bot push to main through the
       # admin bypass of the branch ruleset. Falls back to GITHUB_TOKEN if unset.

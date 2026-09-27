@@ -6,6 +6,7 @@
  */
 import { join } from 'node:path'
 import { gh, type RepoLite, searchCodeRepos, searchRepos } from './lib/github.js'
+import { refreshPolicy } from './lib/refresh.js'
 import { arg, DATA, readJsonl, writeJsonl } from './lib/store.js'
 import { readSubmissions } from './lib/submission-file.js'
 
@@ -128,6 +129,7 @@ async function main() {
     throw new Error(`--days must be a positive integer or "all", got "${daysArg}"`)
   const now = new Date().toISOString()
   const existing = new Map(readJsonl<Candidate>(OUT).map(c => [c.repo, c]))
+  const refresh = refreshPolicy()
   const hits = new Map<string, { sources: Set<string>; evidence: Set<string>; meta?: RepoLite }>()
   const touch = (repo: string, source: string, meta?: RepoLite, evidence?: string) => {
     if (!hits.has(repo)) hits.set(repo, { sources: new Set(), evidence: new Set() })
@@ -185,11 +187,18 @@ async function main() {
   // Fill missing meta (code-search / list / submission hits) with a repo GET. A submitted
   // repo that no search found lands here, spending the GET the carried-candidate loop below
   // would otherwise have spent on it — so a submission costs no extra API calls after the
-  // first run.
+  // first run. A known repo that is not due for its re-check (lib/refresh.ts) keeps the meta
+  // it already has instead.
   console.error('== fetching meta for hits without search meta')
   let fetched = 0
+  let reused = 0
   for (const [repo, h] of hits) {
     if (h.meta) continue
+    const prev = existing.get(repo)
+    if (prev && !refresh.due(repo, [...prev.sources, ...h.sources], prev.meta)) {
+      reused++
+      continue
+    }
     const r = await gh<RepoLite>(`/repos/${repo}`, {}, { allow404: true })
     if (!r) {
       // Say so for submissions: this is the silent drop the verdict workflow has to explain
@@ -202,46 +211,61 @@ async function main() {
     h.meta = r
     fetched++
   }
-  console.error(`  fetched ${fetched}`)
+  console.error(`  fetched ${fetched}, kept known meta for ${reused} not due`)
 
   const rows: Candidate[] = []
   for (const [repo, h] of hits) {
-    const m = h.meta!
-    if (m.fork || m.archived) continue
     const prev = existing.get(repo)
+    // Without fresh meta the hit was skipped above as a known repo, so prev is set.
+    const m = h.meta
+    const meta: Candidate['meta'] = m
+      ? {
+          description: m.description,
+          topics: m.topics ?? [],
+          language: m.language,
+          stargazers_count: m.stargazers_count,
+          created_at: m.created_at,
+          pushed_at: m.pushed_at,
+          fork: m.fork,
+          archived: m.archived,
+          homepage: m.homepage,
+          owner: m.owner.login,
+          owner_type: m.owner.type,
+        }
+      : prev!.meta
+    if (meta.fork || meta.archived) continue
     rows.push({
       repo,
       sources: [...new Set([...(prev?.sources ?? []), ...h.sources])],
       evidence: [...new Set([...(prev?.evidence ?? []), ...h.evidence])],
       first_seen: prev?.first_seen ?? now,
       last_seen: now,
-      meta: {
-        description: m.description,
-        topics: m.topics ?? [],
-        language: m.language,
-        stargazers_count: m.stargazers_count,
-        created_at: m.created_at,
-        pushed_at: m.pushed_at,
-        fork: m.fork,
-        archived: m.archived,
-        homepage: m.homepage,
-        owner: m.owner.login,
-        owner_type: m.owner.type,
-      },
+      meta,
     })
   }
   // Missing from one run's searches is usually search flakiness, not deletion, so previously
   // seen repos are kept. But nothing downstream ever rechecks a carried repo — enrich skips it
   // while pushed_at is unchanged — so a deleted one would stay a candidate, and stay in the
   // README, forever. Confirm the ones that went missing still exist. A repo dropped by mistake
-  // comes back on the next run that searches it up.
+  // comes back on the next run that searches it up. The check is one REST call per repo, so it
+  // runs on each repo's refresh day (lib/refresh.ts), not every day.
   let vanished = 0
+  let checked = 0
+  let deferred = 0
   for (const [repo, c] of existing) {
     if (hits.has(repo)) continue
+    if (!refresh.due(repo, c.sources, c.meta)) {
+      rows.push(c)
+      deferred++
+      continue
+    }
+    checked++
     if (await gh<RepoLite>(`/repos/${repo}`, {}, { allow404: true })) rows.push(c)
     else vanished++
   }
+  console.error(`  carried: checked ${checked}, deferred ${deferred} not due`)
   if (vanished) console.error(`  dropped ${vanished} carried repos that no longer exist`)
+  console.error(`  refresh tiers due/evaluated: ${refresh.summary()}`)
   rows.sort((a, b) => b.meta.stargazers_count - a.meta.stargazers_count)
   writeJsonl(OUT, rows)
 
