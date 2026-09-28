@@ -36,7 +36,16 @@ export type Candidate = {
     | 'fork'
     | 'archived'
     | 'homepage'
-  > & { owner: string; owner_type: string }
+  > & {
+    owner: string
+    owner_type: string
+    // Set whenever the meta comes straight from GitHub (a search result or a repo GET) and
+    // carried unchanged otherwise. enrich takes a same-run copy as its repo metadata instead
+    // of fetching it again. Rows written before these fields existed lack all three.
+    forks_count?: number
+    license?: string | null
+    fetched_at?: string
+  }
 }
 
 const SEED_LISTS = [
@@ -231,6 +240,9 @@ async function main() {
           homepage: m.homepage,
           owner: m.owner.login,
           owner_type: m.owner.type,
+          forks_count: m.forks_count,
+          license: m.license?.spdx_id ?? null,
+          fetched_at: now,
         }
       : prev!.meta
     if (meta.fork || meta.archived) continue
