@@ -1,5 +1,5 @@
-import { CATEGORY_UNCERTAIN_BELOW, GATE, SUBSTANCE_GATE } from '@/lib/data'
 import { num } from '@/lib/format'
+import { CATEGORY_UNCERTAIN_BELOW, GATE, SUBSTANCE_GATE } from '@/lib/shared'
 
 const clamp = (v: number) => Math.max(0, Math.min(1, v))
 

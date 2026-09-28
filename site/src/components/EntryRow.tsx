@@ -2,9 +2,9 @@ import Link from 'next/link'
 import type { CSSProperties, Ref } from 'react'
 import { VerdictCell } from '@/components/Bars'
 import { CategoryChip } from '@/components/Chip'
-import { entryHref, githubUrl, splitRepo } from '@/lib/data'
 import { compactNumber } from '@/lib/format'
-import type { Entry } from '@/lib/types'
+import { entryHref, githubUrl, splitRepo } from '@/lib/shared'
+import type { EntryLite } from '@/lib/types'
 
 /** One repository per hairline row. Status is typographic: ink, muted + dashed, faint.
  *  ref/style/index exist so the virtualizer can measure and place the <li> directly —
@@ -15,7 +15,7 @@ export function EntryRow({
   style,
   index,
 }: {
-  entry: Entry
+  entry: EntryLite
   ref?: Ref<HTMLLIElement>
   style?: CSSProperties
   index?: number

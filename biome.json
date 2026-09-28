@@ -11,6 +11,7 @@
       "!site/.next",
       "!site/out",
       "!site/src/generated",
+      "!site/public/data",
       "!site/next-env.d.ts",
       "!data"
     ]

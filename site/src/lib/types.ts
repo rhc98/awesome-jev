@@ -18,23 +18,28 @@ export interface JevJudgment {
   judged_at: string
 }
 
-export interface Entry {
+/** The slice of an entry the directory list needs; what public/data files carry. */
+export interface EntryLite {
   repo: string
   name: string
   description: string | null
-  site: string | null
   language: string | null
   stars: number
   created: string
   pushed: string
-  license: string | null
-  is_official: boolean
   category: string
   category_uncertain: boolean
   pattern: string
   status: Status
   status_reason: string
   readme_pick: boolean
+  jev: Pick<JevJudgment, 'genuine' | 'substance' | 'category_conf' | 'composite'>
+}
+
+export interface Entry extends EntryLite {
+  site: string | null
+  license: string | null
+  is_official: boolean
   jev: JevJudgment
   override: Record<string, unknown> | string | null
   sources: string[]
@@ -55,6 +60,20 @@ export interface Curated {
   policy: Record<string, unknown>
   stats: Stats
   entries: Entry[]
+}
+
+/** Written by scripts/sync-data.mjs; small enough to ship in the client bundle. */
+export interface ClientManifest {
+  generated_at: string
+  stats: Stats
+  policy: {
+    listed_min: number | null
+    substance_min: number | null
+    category_uncertain_below: number | null
+  }
+  facets: { categories: string[]; patterns: string[]; languages: string[] }
+  category_counts: Record<Status, Record<string, number>>
+  files: Record<Status, string>
 }
 
 export interface GateSweepRow {
