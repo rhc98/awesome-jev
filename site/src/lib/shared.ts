@@ -2,9 +2,33 @@
 // full curated data: anything reachable from a 'use client' module ships in the
 // browser bundle. Policy values come from the small generated client manifest.
 import manifestJson from '@/generated/client-manifest.json'
-import type { ClientManifest } from './types'
+import type { ClientManifest, EntryLite, Status } from './types'
 
 export const manifest = manifestJson as unknown as ClientManifest
+
+export const STATUSES: Status[] = ['listed', 'review', 'excluded']
+
+export type SortKey = 'score' | 'stars' | 'created' | 'pushed'
+
+/** Directory order. Shared so the server can precompute the default first page. */
+export function compareEntries(a: EntryLite, b: EntryLite, sort: SortKey): number {
+  switch (sort) {
+    case 'stars':
+      return b.stars - a.stars || b.jev.composite - a.jev.composite
+    case 'created':
+      return b.created.localeCompare(a.created) || b.jev.composite - a.jev.composite
+    case 'pushed':
+      return b.pushed.localeCompare(a.pushed) || b.jev.composite - a.jev.composite
+    default:
+      return b.jev.composite - a.jev.composite || b.stars - a.stars
+  }
+}
+
+/**
+ * Entries rendered before the data files load: the prerendered HTML and the first
+ * hydration pass. The server passes this many from the default view.
+ */
+export const STATIC_ITEMS = 24
 
 /** Policy thresholds; every verdict bar draws its tick from these. Never hard-code one. */
 const numberOr = (value: number | null | undefined, fallback: number) =>

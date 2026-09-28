@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Directory } from '@/components/Directory'
-import { curated } from '@/lib/data'
+import { compareEntries, curated, entries, STATIC_ITEMS, toLite } from '@/lib/data'
 import { formatDate } from '@/lib/format'
 import { openGraph } from '@/lib/seo'
 
@@ -24,6 +24,12 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 
 export default function HomePage() {
   const { stats, generated_at } = curated
+  // The directory's default view (listed, by score); the rest is fetched client-side.
+  const initial = entries
+    .filter(entry => entry.status === 'listed')
+    .sort((a, b) => compareEntries(a, b, 'score'))
+    .slice(0, STATIC_ITEMS)
+    .map(toLite)
 
   return (
     <div>
@@ -49,7 +55,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Directory />
+      <Directory initial={initial} />
     </div>
   )
 }
