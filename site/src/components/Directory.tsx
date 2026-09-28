@@ -4,12 +4,21 @@ import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EntryCard } from '@/components/EntryCard'
 import { EntryRow } from '@/components/EntryRow'
-import { categories, categoryLabel, entries, languages, patternLabel, patterns } from '@/lib/data'
-import type { Entry, Status } from '@/lib/types'
+import {
+  categoryLabel,
+  compareEntries,
+  manifest,
+  patternLabel,
+  type SortKey,
+  STATIC_ITEMS,
+  STATUSES,
+} from '@/lib/shared'
+import type { EntryLite, Status } from '@/lib/types'
 
 type StatusFilter = Status | 'all'
-type SortKey = 'score' | 'stars' | 'created' | 'pushed'
 type View = 'rows' | 'cards'
+
+const { categories, patterns, languages } = manifest.facets
 
 const STATUS_TABS: { value: StatusFilter; label: string }[] = [
   { value: 'listed', label: 'Listed' },
@@ -31,12 +40,6 @@ const DEFAULTS = {
   view: 'rows' as View,
 }
 
-// The virtualizer has nothing to measure during `output: export` prerender, so the
-// first slice is rendered plainly and swapped for the virtual window after mount.
-// That keeps real entries in the static HTML — an empty scroll spacer would drop
-// the default grid the page is built to ship — while capping the hydrated DOM.
-const STATIC_ITEMS = 24
-
 // Matches the sm:grid-cols-2 / lg:grid-cols-3 breakpoints on the card grid.
 const CARD_BREAKPOINTS = [
   { query: '(min-width: 1024px)', lanes: 3 },
@@ -48,7 +51,29 @@ const CARD_BREAKPOINTS = [
 const ESTIMATE = { rows: 132, cards: 196 }
 const CARD_GAP = 12 // gap-3
 
-function matchesQuery(entry: Entry, query: string): boolean {
+// The entry data lives in public/data, one file per status, and is fetched after
+// mount so it never ships in the JS bundle. Cached per page load; a failed fetch is
+// dropped so the retry button can ask again.
+const loads = new Map<Status, Promise<EntryLite[]>>()
+
+function loadStatus(status: Status): Promise<EntryLite[]> {
+  let pending = loads.get(status)
+  if (!pending) {
+    pending = fetch(manifest.files[status]).then(response => {
+      if (!response.ok) throw new Error(`${manifest.files[status]}: HTTP ${response.status}`)
+      return response.json() as Promise<EntryLite[]>
+    })
+    pending.catch(() => loads.delete(status))
+    loads.set(status, pending)
+  }
+  return pending
+}
+
+function statusesFor(status: StatusFilter): Status[] {
+  return status === 'all' ? STATUSES : [status]
+}
+
+function matchesQuery(entry: EntryLite, query: string): boolean {
   if (!query) return true
   const haystack = `${entry.name} ${entry.repo} ${entry.description ?? ''}`.toLowerCase()
   return query
@@ -58,20 +83,11 @@ function matchesQuery(entry: Entry, query: string): boolean {
     .every(token => haystack.includes(token))
 }
 
-function compare(a: Entry, b: Entry, sort: SortKey): number {
-  switch (sort) {
-    case 'stars':
-      return b.stars - a.stars || b.jev.composite - a.jev.composite
-    case 'created':
-      return b.created.localeCompare(a.created) || b.jev.composite - a.jev.composite
-    case 'pushed':
-      return b.pushed.localeCompare(a.pushed) || b.jev.composite - a.jev.composite
-    default:
-      return b.jev.composite - a.jev.composite || b.stars - a.stars
-  }
-}
-
-export function Directory() {
+/**
+ * `initial` is the default view's first STATIC_ITEMS entries, computed on the
+ * server. It fills the static HTML and stands in until the data file arrives.
+ */
+export function Directory({ initial }: { initial: EntryLite[] }) {
   // Filter state lives in the URL, but it is read after mount rather than through
   // useSearchParams: that keeps the default (listed, by score) grid in the static
   // HTML instead of bailing the whole subtree out to a client-only render.
@@ -124,34 +140,86 @@ export function Directory() {
     [selectedCategories, setParam],
   )
 
-  const results = useMemo(() => {
-    const catSet = new Set(selectedCategories)
-    return entries
-      .filter(entry => {
-        if (status !== 'all' && entry.status !== status) return false
-        if (catSet.size > 0 && !catSet.has(entry.category)) return false
-        if (pattern && entry.pattern !== pattern) return false
-        if (language && entry.language !== language) return false
-        return matchesQuery(entry, query)
-      })
-      .sort((a, b) => compare(a, b, sort))
-  }, [language, pattern, query, selectedCategories, sort, status])
-
-  const categoryCounts = useMemo(() => {
-    const counts = new Map<string, number>()
-    for (const entry of entries) {
-      if (status !== 'all' && entry.status !== status) continue
-      counts.set(entry.category, (counts.get(entry.category) ?? 0) + 1)
-    }
-    return counts
-  }, [status])
-
   const listEl = useRef<HTMLElement | null>(null)
   const [listTop, setListTop] = useState(0)
   const [mounted, setMounted] = useState(false)
   const [cardLanes, setCardLanes] = useState(1)
 
   useEffect(() => setMounted(true), [])
+
+  const [loaded, setLoaded] = useState<Partial<Record<Status, EntryLite[]>>>({})
+  const [loadError, setLoadError] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+
+  // Waits for mount so the URL has been read: a deep link to ?status=excluded
+  // should not fetch the listed file first.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `attempt` re-runs a failed load
+  useEffect(() => {
+    if (!mounted) return
+    const missing = statusesFor(status).filter(s => !loaded[s])
+    if (missing.length === 0) return
+    let cancelled = false
+    setLoadError(false)
+    Promise.all(missing.map(loadStatus)).then(
+      lists => {
+        if (cancelled) return
+        setLoaded(prev => {
+          const next = { ...prev }
+          missing.forEach((s, i) => {
+            next[s] = lists[i]
+          })
+          return next
+        })
+      },
+      () => {
+        if (!cancelled) setLoadError(true)
+      },
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [mounted, status, loaded, attempt])
+
+  const source = useMemo(() => {
+    const lists = statusesFor(status).map(s => loaded[s])
+    return lists.every((list): list is EntryLite[] => Boolean(list)) ? lists.flat() : null
+  }, [loaded, status])
+
+  const isDefaultView =
+    !query &&
+    !pattern &&
+    !language &&
+    selectedCategories.length === 0 &&
+    status === DEFAULTS.status &&
+    sort === DEFAULTS.sort
+
+  // null while the data this view needs is still loading. The default view has
+  // its first slice from the server, so it never shows a loading state.
+  const results = useMemo(() => {
+    if (!source) return isDefaultView ? initial : null
+    const catSet = new Set(selectedCategories)
+    return source
+      .filter(entry => {
+        if (catSet.size > 0 && !catSet.has(entry.category)) return false
+        if (pattern && entry.pattern !== pattern) return false
+        if (language && entry.language !== language) return false
+        return matchesQuery(entry, query)
+      })
+      .sort((a, b) => compareEntries(a, b, sort))
+  }, [initial, isDefaultView, language, pattern, query, selectedCategories, sort, source])
+
+  // Known without the data: the unfiltered default view counts every listed entry.
+  const resultCount = source ? results?.length : isDefaultView ? manifest.stats.listed : undefined
+
+  const categoryCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const s of statusesFor(status)) {
+      for (const [category, n] of Object.entries(manifest.category_counts[s])) {
+        counts.set(category, (counts.get(category) ?? 0) + n)
+      }
+    }
+    return counts
+  }, [status])
 
   // A callback ref rather than useRef: the virtualizer needs the list's document
   // offset as an option at render time, so the measurement has to reach state the
@@ -183,7 +251,7 @@ export function Directory() {
 
   const lanes = view === 'cards' ? cardLanes : 1
   const virtualizer = useWindowVirtualizer({
-    count: results.length,
+    count: results?.length ?? 0,
     estimateSize: () => (view === 'cards' ? ESTIMATE.cards : ESTIMATE.rows),
     overscan: 6,
     lanes,
@@ -366,7 +434,11 @@ export function Directory() {
 
         <div className="flex items-center justify-between gap-3 py-2 text-[13px] text-muted">
           <span className="num font-mono">
-            {results.length} {results.length === 1 ? 'entry' : 'entries'}
+            {resultCount === undefined
+              ? loadError
+                ? '—'
+                : 'Loading…'
+              : `${resultCount} ${resultCount === 1 ? 'entry' : 'entries'}`}
           </span>
           {hasFilters ? (
             <button type="button" onClick={reset} className="text-accent hover:underline">
@@ -375,13 +447,31 @@ export function Directory() {
           ) : null}
         </div>
 
-        {results.length === 0 ? (
+        {loadError ? (
+          <div className="flex items-center justify-between gap-3 rounded-md bg-panel-alt px-4 py-3 text-[14px] text-body">
+            <span>Could not load the entries.</span>
+            <button
+              type="button"
+              onClick={() => setAttempt(n => n + 1)}
+              className="text-accent hover:underline"
+            >
+              Try again
+            </button>
+          </div>
+        ) : null}
+
+        {results === null ? (
+          loadError ? null : (
+            <p className="py-16 text-center text-[14px] text-muted">Loading entries…</p>
+          )
+        ) : results.length === 0 ? (
           <p className="py-16 text-center text-[14px] text-muted">
             No entries match these filters.
           </p>
         ) : !mounted ? (
-          // Prerender and first hydration pass: a plain slice, so the markup the
-          // client starts from is identical to the exported HTML.
+          // Prerender and first hydration pass: the virtualizer has nothing to
+          // measure yet, so render the server's slice plainly. Real entries stay in
+          // the static HTML and the markup the client starts from is identical.
           view === 'cards' ? (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {results.slice(0, STATIC_ITEMS).map(entry => (

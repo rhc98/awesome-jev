@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { categoryLabel } from '@/lib/data'
+import { categoryLabel } from '@/lib/shared'
 
 export function Chip({
   children,

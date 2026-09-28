@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { VerdictCell } from '@/components/Bars'
 import { CategoryChip } from '@/components/Chip'
-import { entryHref, githubUrl, splitRepo } from '@/lib/data'
 import { compactNumber } from '@/lib/format'
-import type { Entry } from '@/lib/types'
+import { entryHref, githubUrl, splitRepo } from '@/lib/shared'
+import type { EntryLite } from '@/lib/types'
 
 /** Optional grid view. Same content as EntryRow, in a white card. */
-export function EntryCard({ entry }: { entry: Entry }) {
+export function EntryCard({ entry }: { entry: EntryLite }) {
   const { owner } = splitRepo(entry.repo)
   const review = entry.status === 'review'
   const excluded = entry.status === 'excluded'

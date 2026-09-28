@@ -6,7 +6,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!.next", "!out", "!src/generated", "!next-env.d.ts"]
+    "includes": ["**", "!.next", "!out", "!src/generated", "!public/data", "!next-env.d.ts"]
   },
   "formatter": {
     "enabled": true,
