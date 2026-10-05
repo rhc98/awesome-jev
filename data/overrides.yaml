@@ -6,3 +6,56 @@ vercel/eve:
   category: integration
   reason: README never mentions Jev, but the experimental evaluate path ships Jev as its default evaluation model (jev-latest in code); README-only evidence cannot see it
   by: rhc
+confident-ai/deepeval:
+  status: listed
+  category: integration
+  reason: Ships a first-class TypeSafe model adapter (deepeval/models/system_one/typesafe_model.py, TypeScript port in typescript/src/models/system-one, docs/content/integrations/models/typesafe-ai.mdx) so any metric can use Jev as its judge model
+  by: rhc
+agentscope-ai/agentscope:
+  status: listed
+  reason: Adds a Jev classifier model (src/agentscope/classifier/_jev/_model.py, defaulting to jev-latest) with tests in tests/classifier_jev_test.py
+  by: rhc
+CopilotKit/openmuse:
+  status: listed
+  reason: The server calls Jev through @typesafe-ai/sdk (apps/server/src/jev/adapter.ts) to pick clarification, comparison or agent control, and overrides the agent's prepared control when Jev is at least 0.5 confident
+  by: rhc
+WrongStack/WrongStack:
+  status: listed
+  reason: Built-in TypeSafe client with circuit breaker and routing (packages/core/src/typesafe/), a Jev-backed skill suggester and dispatch classifier, and a wstack typesafe CLI documented in docs/typesafe-account.md
+  by: rhc
+AgentiLoop/Agent:
+  status: listed
+  reason: Ships a Swift TypeSafe client (TypeSafeKit/) and Agent/Services/JevAdvisor.swift, which has Jev review shell commands before they run; optional and fail-open
+  by: rhc
+BrokkAi/mjolnir:
+  status: listed
+  reason: The Jev classifier is on by default (README says enabled = false under [jev] in config.toml turns it off); mj-core/src/help_search.rs and mj-core/src/continuation.rs call jev-latest through services/jev-proxy
+  by: rhc
+TauricResearch/TradingAgents:
+  status: listed
+  reason: tradingagents/agents/post_screen.py screens StockTwits and Reddit posts with Jev (relevance and stance) for the sentiment analyst; optional, active when TYPESAFE_API_KEY is set, and fail-open
+  by: rhc
+virattt/ai-hedge-fund:
+  status: listed
+  reason: Jev is a selectable model provider (JevLLM in hedge_fund/llm/client.py, registry.py, jev-1.13.0 in api_models.json, TYPESAFE_API_KEY in .env.example) with tests in hedge_fund/llm/test_client.py
+  by: rhc
+kitze/skillbox:
+  status: listed
+  reason: Optional task-aware skill recommendations call api.typesafe.ai/v1/systemone directly (src/server/recommendations.ts), selectable alongside Vercel AI Gateway and OpenRouter, with tests/recommendations.test.ts
+  by: rhc
+liuyanghejerry/Clausura:
+  status: listed
+  reason: Optional fail-open findings verification filter backed by Jev (crates/clausura-core/src/jev.rs), documented in docs/guide/findings-verification.md
+  by: rhc
+MillionSend/millionsend:
+  status: listed
+  reason: Optional content-monitor judge, off by default, scores sampled mail with Jev (apps/worker/src/abuse-judge/typesafe.ts, packages/core/src/abuse-judge/questions.ts), documented in SELF_HOSTING.md
+  by: rhc
+Ray0907/security-scan:
+  status: excluded
+  reason: CHANGELOG.md lists the optional TypeSafe Jev verdict suggestions (suggest_verdicts.py) as removed, and a code search for typesafe in the repo finds only that CHANGELOG entry
+  by: rhc
+airen3339/laya:
+  status: excluded
+  reason: A self-hosted Jev-compatible server (laya/serve.py implements /v1/systemone), not a Jev client; Jev calls appear only in research/benchmarks scripts, and the README points at NandhaKishorM/laya assets, which is already excluded
+  by: rhc
