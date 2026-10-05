@@ -20,23 +20,23 @@
   },
   "stats": {
     "total": 10736,
-    "listed": 8446,
-    "review": 580,
-    "excluded": 1710,
+    "listed": 8457,
+    "review": 567,
+    "excluded": 1712,
     "readme_picks": 135,
     "by_category": {
-      "integration": 426,
+      "integration": 427,
       "research_eval": 1710,
-      "application": 2250,
+      "application": 2255,
       "game_sim": 703,
-      "agent_tooling": 2025,
+      "agent_tooling": 2030,
       "official": 4,
       "meta_list": 168,
       "sdk_client": 552,
       "learning": 597,
       "other": 11
     },
-    "overrides": 1
+    "overrides": 14
   },
   "entries": [
     {
@@ -1999,9 +1999,9 @@
       "category": "application",
       "category_uncertain": false,
       "pattern": "unclear",
-      "status": "review",
-      "status_reason": "genuine 0.32 below 0.5",
-      "readme_pick": false,
+      "status": "listed",
+      "status_reason": "override: tradingagents/agents/post_screen.py screens StockTwits and Reddit posts with Jev (relevance and stance) for the sentiment analyst; optional, active when TYPESAFE_API_KEY is set, and fail-open",
+      "readme_pick": true,
       "jev": {
         "genuine": 0.32,
         "runtime_use": 0.22,
@@ -2028,7 +2028,11 @@
         "qset": "v2",
         "judged_at": "2026-10-04T11:47:32.216Z"
       },
-      "override": null,
+      "override": {
+        "status": "listed",
+        "reason": "tradingagents/agents/post_screen.py screens StockTwits and Reddit posts with Jev (relevance and stance) for the sentiment analyst; optional, active when TYPESAFE_API_KEY is set, and fail-open",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"api.typesafe.ai\"",
         "code:\"jev-latest\""
@@ -2964,12 +2968,12 @@
       "pushed": "2026-10-02",
       "license": "Apache-2.0",
       "is_official": false,
-      "category": "research_eval",
+      "category": "integration",
       "category_uncertain": false,
       "pattern": "feature_scoring",
-      "status": "review",
-      "status_reason": "genuine 0.42 below 0.5",
-      "readme_pick": false,
+      "status": "listed",
+      "status_reason": "override: Ships a first-class TypeSafe model adapter (deepeval/models/system_one/typesafe_model.py, TypeScript port in typescript/src/models/system-one, docs/content/integrations/models/typesafe-ai.mdx) so any metric can use Jev as its judge model",
+      "readme_pick": true,
       "jev": {
         "genuine": 0.42,
         "runtime_use": 0.39,
@@ -2996,7 +3000,12 @@
         "qset": "v2",
         "judged_at": "2026-10-03T11:04:27.575Z"
       },
-      "override": null,
+      "override": {
+        "status": "listed",
+        "category": "integration",
+        "reason": "Ships a first-class TypeSafe model adapter (deepeval/models/system_one/typesafe_model.py, TypeScript port in typescript/src/models/system-one, docs/content/integrations/models/typesafe-ai.mdx) so any metric can use Jev as its judge model",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"typesafe_sdk\"",
         "code:\"jev-latest\"",
@@ -8179,7 +8188,7 @@
       "pattern": "verification",
       "status": "listed",
       "status_reason": "gate passed",
-      "readme_pick": true,
+      "readme_pick": false,
       "jev": {
         "genuine": 0.96,
         "runtime_use": 0.95,
@@ -9447,7 +9456,7 @@
       "pattern": "infra",
       "status": "listed",
       "status_reason": "gate passed",
-      "readme_pick": true,
+      "readme_pick": false,
       "jev": {
         "genuine": 0.51,
         "runtime_use": 0.41,
@@ -12421,8 +12430,8 @@
       "category": "application",
       "category_uncertain": false,
       "pattern": "control_loop",
-      "status": "review",
-      "status_reason": "genuine 0.44 below 0.5",
+      "status": "listed",
+      "status_reason": "override: The server calls Jev through @typesafe-ai/sdk (apps/server/src/jev/adapter.ts) to pick clarification, comparison or agent control, and overrides the agent's prepared control when Jev is at least 0.5 confident",
       "readme_pick": false,
       "jev": {
         "genuine": 0.44,
@@ -12450,7 +12459,11 @@
         "qset": "v2",
         "judged_at": "2026-10-03T11:04:29.049Z"
       },
-      "override": null,
+      "override": {
+        "status": "listed",
+        "reason": "The server calls Jev through @typesafe-ai/sdk (apps/server/src/jev/adapter.ts) to pick clarification, comparison or agent control, and overrides the agent's prepared control when Jev is at least 0.5 confident",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"@typesafe-ai/sdk\""
       ]
@@ -12822,8 +12835,8 @@
       "category": "agent_tooling",
       "category_uncertain": false,
       "pattern": "infra",
-      "status": "review",
-      "status_reason": "genuine 0.41 below 0.5",
+      "status": "listed",
+      "status_reason": "override: Adds a Jev classifier model (src/agentscope/classifier/_jev/_model.py, defaulting to jev-latest) with tests in tests/classifier_jev_test.py",
       "readme_pick": false,
       "jev": {
         "genuine": 0.41,
@@ -12851,7 +12864,11 @@
         "qset": "v2",
         "judged_at": "2026-09-30T11:54:15.983Z"
       },
-      "override": null,
+      "override": {
+        "status": "listed",
+        "reason": "Adds a Jev classifier model (src/agentscope/classifier/_jev/_model.py, defaulting to jev-latest) with tests in tests/classifier_jev_test.py",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"typesafe_sdk\"",
         "code:\"jev-latest\"",
@@ -23938,8 +23955,8 @@
       "category": "application",
       "category_uncertain": false,
       "pattern": "verification",
-      "status": "review",
-      "status_reason": "genuine 0.37 below 0.5",
+      "status": "listed",
+      "status_reason": "override: Ships a Swift TypeSafe client (TypeSafeKit/) and Agent/Services/JevAdvisor.swift, which has Jev review shell commands before they run; optional and fail-open",
       "readme_pick": false,
       "jev": {
         "genuine": 0.37,
@@ -23967,7 +23984,11 @@
         "qset": "v2",
         "judged_at": "2026-09-21T12:34:23.717Z"
       },
-      "override": null,
+      "override": {
+        "status": "listed",
+        "reason": "Ships a Swift TypeSafe client (TypeSafeKit/) and Agent/Services/JevAdvisor.swift, which has Jev review shell commands before they run; optional and fail-open",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"api.typesafe.ai\"",
         "code:\"jev-latest\""
@@ -39919,8 +39940,8 @@
       "category": "agent_tooling",
       "category_uncertain": false,
       "pattern": "verification",
-      "status": "review",
-      "status_reason": "genuine 0.30 below 0.5",
+      "status": "excluded",
+      "status_reason": "override: CHANGELOG.md lists the optional TypeSafe Jev verdict suggestions (suggest_verdicts.py) as removed, and a code search for typesafe in the repo finds only that CHANGELOG entry",
       "readme_pick": false,
       "jev": {
         "genuine": 0.3,
@@ -39948,7 +39969,11 @@
         "qset": "v2",
         "judged_at": "2026-09-18T14:04:46.466Z"
       },
-      "override": null,
+      "override": {
+        "status": "excluded",
+        "reason": "CHANGELOG.md lists the optional TypeSafe Jev verdict suggestions (suggest_verdicts.py) as removed, and a code search for typesafe in the repo finds only that CHANGELOG entry",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"typesafe_sdk\""
       ]
@@ -41791,8 +41816,8 @@
       "category": "agent_tooling",
       "category_uncertain": false,
       "pattern": "verification",
-      "status": "review",
-      "status_reason": "genuine 0.40 below 0.5",
+      "status": "listed",
+      "status_reason": "override: The Jev classifier is on by default (README says enabled = false under [jev] in config.toml turns it off); mj-core/src/help_search.rs and mj-core/src/continuation.rs call jev-latest through services/jev-proxy",
       "readme_pick": false,
       "jev": {
         "genuine": 0.4,
@@ -41820,7 +41845,11 @@
         "qset": "v2",
         "judged_at": "2026-09-27T11:42:18.356Z"
       },
-      "override": null,
+      "override": {
+        "status": "listed",
+        "reason": "The Jev classifier is on by default (README says enabled = false under [jev] in config.toml turns it off); mj-core/src/help_search.rs and mj-core/src/continuation.rs call jev-latest through services/jev-proxy",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"api.typesafe.ai\"",
         "code:\"jev-latest\""
@@ -44519,8 +44548,8 @@
       "category": "research_eval",
       "category_uncertain": false,
       "pattern": "routing",
-      "status": "review",
-      "status_reason": "genuine 0.32 below 0.5",
+      "status": "excluded",
+      "status_reason": "override: A self-hosted Jev-compatible server (laya/serve.py implements /v1/systemone), not a Jev client; Jev calls appear only in research/benchmarks scripts, and the README points at NandhaKishorM/laya assets, which is already excluded",
       "readme_pick": false,
       "jev": {
         "genuine": 0.32,
@@ -44548,7 +44577,11 @@
         "qset": "v2",
         "judged_at": "2026-09-24T11:54:45.720Z"
       },
-      "override": null,
+      "override": {
+        "status": "excluded",
+        "reason": "A self-hosted Jev-compatible server (laya/serve.py implements /v1/systemone), not a Jev client; Jev calls appear only in research/benchmarks scripts, and the README points at NandhaKishorM/laya assets, which is already excluded",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"api.typesafe.ai\""
       ]
@@ -51373,8 +51406,8 @@
       "category": "agent_tooling",
       "category_uncertain": false,
       "pattern": "unclear",
-      "status": "review",
-      "status_reason": "genuine 0.43 below 0.5",
+      "status": "listed",
+      "status_reason": "override: Built-in TypeSafe client with circuit breaker and routing (packages/core/src/typesafe/), a Jev-backed skill suggester and dispatch classifier, and a wstack typesafe CLI documented in docs/typesafe-account.md",
       "readme_pick": false,
       "jev": {
         "genuine": 0.43,
@@ -51402,7 +51435,11 @@
         "qset": "v2",
         "judged_at": "2026-09-20T11:22:16.856Z"
       },
-      "override": null,
+      "override": {
+        "status": "listed",
+        "reason": "Built-in TypeSafe client with circuit breaker and routing (packages/core/src/typesafe/), a Jev-backed skill suggester and dispatch classifier, and a wstack typesafe CLI documented in docs/typesafe-account.md",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"@typesafe-ai/sdk\"",
         "code:\"api.typesafe.ai\"",
@@ -106017,8 +106054,8 @@
       "category": "agent_tooling",
       "category_uncertain": false,
       "pattern": "verification",
-      "status": "review",
-      "status_reason": "genuine 0.36 below 0.5",
+      "status": "listed",
+      "status_reason": "override: Optional fail-open findings verification filter backed by Jev (crates/clausura-core/src/jev.rs), documented in docs/guide/findings-verification.md",
       "readme_pick": false,
       "jev": {
         "genuine": 0.36,
@@ -106046,7 +106083,11 @@
         "qset": "v2",
         "judged_at": "2026-09-21T12:34:25.089Z"
       },
-      "override": null,
+      "override": {
+        "status": "listed",
+        "reason": "Optional fail-open findings verification filter backed by Jev (crates/clausura-core/src/jev.rs), documented in docs/guide/findings-verification.md",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"api.typesafe.ai\""
       ]
@@ -117422,8 +117463,8 @@
       "category": "application",
       "category_uncertain": false,
       "pattern": "unclear",
-      "status": "review",
-      "status_reason": "genuine 0.45 below 0.5",
+      "status": "listed",
+      "status_reason": "override: Jev is a selectable model provider (JevLLM in hedge_fund/llm/client.py, registry.py, jev-1.13.0 in api_models.json, TYPESAFE_API_KEY in .env.example) with tests in hedge_fund/llm/test_client.py",
       "readme_pick": false,
       "jev": {
         "genuine": 0.45,
@@ -117451,7 +117492,11 @@
         "qset": "v2",
         "judged_at": "2026-10-03T11:04:25.925Z"
       },
-      "override": null,
+      "override": {
+        "status": "listed",
+        "reason": "Jev is a selectable model provider (JevLLM in hedge_fund/llm/client.py, registry.py, jev-1.13.0 in api_models.json, TYPESAFE_API_KEY in .env.example) with tests in hedge_fund/llm/test_client.py",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"api.typesafe.ai\"",
         "list:yibie/awesome-jev"
@@ -131653,8 +131698,8 @@
       "category": "application",
       "category_uncertain": false,
       "pattern": "feature_scoring",
-      "status": "review",
-      "status_reason": "genuine 0.40 below 0.5",
+      "status": "listed",
+      "status_reason": "override: Optional content-monitor judge, off by default, scores sampled mail with Jev (apps/worker/src/abuse-judge/typesafe.ts, packages/core/src/abuse-judge/questions.ts), documented in SELF_HOSTING.md",
       "readme_pick": false,
       "jev": {
         "genuine": 0.4,
@@ -131682,7 +131727,11 @@
         "qset": "v2",
         "judged_at": "2026-10-04T11:47:37.354Z"
       },
-      "override": null,
+      "override": {
+        "status": "listed",
+        "reason": "Optional content-monitor judge, off by default, scores sampled mail with Jev (apps/worker/src/abuse-judge/typesafe.ts, packages/core/src/abuse-judge/questions.ts), documented in SELF_HOSTING.md",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"api.typesafe.ai\"",
         "code:\"jev-latest\""
@@ -213680,8 +213729,8 @@
       "category": "agent_tooling",
       "category_uncertain": false,
       "pattern": "infra",
-      "status": "review",
-      "status_reason": "genuine 0.41 below 0.5",
+      "status": "listed",
+      "status_reason": "override: Optional task-aware skill recommendations call api.typesafe.ai/v1/systemone directly (src/server/recommendations.ts), selectable alongside Vercel AI Gateway and OpenRouter, with tests/recommendations.test.ts",
       "readme_pick": false,
       "jev": {
         "genuine": 0.41,
@@ -213709,7 +213758,11 @@
         "qset": "v2",
         "judged_at": "2026-09-22T11:44:40.973Z"
       },
-      "override": null,
+      "override": {
+        "status": "listed",
+        "reason": "Optional task-aware skill recommendations call api.typesafe.ai/v1/systemone directly (src/server/recommendations.ts), selectable alongside Vercel AI Gateway and OpenRouter, with tests/recommendations.test.ts",
+        "by": "rhc"
+      },
       "sources": [
         "code:\"api.typesafe.ai\"",
         "list:yibie/awesome-jev",
