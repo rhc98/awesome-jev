@@ -26,6 +26,10 @@ function describe(e: Entry): string | null {
     new RegExp(`^${name}\\b(?:\\s+v\\d+(?:\\.\\d+)*)?(?:\\s*[:\\u2013\\u2014]|\\s+-)\\s*`, 'i'),
     '',
   )
+  // A bare leading name with no separator ("Jevmem saves ...") still trips the rule,
+  // so swap it for "This project". The lookahead mirrors awesome-lint's own word
+  // boundary, so "jevmem's" or a longer word like "jevmemory" is left alone.
+  d = d.replace(new RegExp(`^${name}(?=$|[\\s.,!?:-])`, 'i'), 'This project')
   if (!d) return null
   d = d.charAt(0).toUpperCase() + d.slice(1)
   if (!/[.!?]$/.test(d)) d += '.'
